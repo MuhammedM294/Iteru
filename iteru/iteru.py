@@ -14,11 +14,16 @@ class Map(ipyleaflet.Map):
         if 'scroll_wheel_zoom' not in kwargs:
             kwargs['scroll_wheel_zoom'] = True
 
-            
-
-
 
         super().__init__(**kwargs)
+
+
+        self.add_control(ipyleaflet.ScaleControl(position = 'bottomleft'))
+        self.add_control(ipyleaflet.ZoomControl(position = 'topright'))
+        self.add_control(ipyleaflet.FullScreenControl(position = 'topright'))
+        self.add_control(ipyleaflet.LayersControl(position = 'topleft'))
+
+        
 
 
     
