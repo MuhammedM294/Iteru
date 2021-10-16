@@ -9,7 +9,7 @@ class Map(ipyleaflet.Map):
             kwargs['center'] = [27,31]
 
         if 'zoom' not in kwargs:
-            kwargs['zoom'] = 6
+            kwargs['zoom'] = 5
 
 
         super().__init__(**kwargs)
