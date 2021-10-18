@@ -1,5 +1,8 @@
 """Main module."""
-import ipyleaflet
+
+import ipyleaflet 
+import ee 
+
 
 
 class Map(ipyleaflet.Map):
@@ -24,43 +27,103 @@ class Map(ipyleaflet.Map):
 
         super().__init__(**kwargs)
 
+        self.add_control(ipyleaflet.SearchControl(
+                         
+                 position="topleft",
+                 url='https://nominatim.openstreetmap.org/search?format=json&q={s}',
+                 zoom = 10 ,
+                 marker = ipyleaflet.Marker(
+                                            icon=ipyleaflet.AwesomeIcon(name="check", 
+                                            marker_color='green', icon_color='darkgreen')
+                                            )
+                                  )
+                        )
+        
         self.add_control(ipyleaflet.ScaleControl(position = 'bottomleft'))
+
+        self.add_control(ipyleaflet.LayersControl(position = 'topleft'))
 
         self.add_control(ipyleaflet.ZoomControl(position = 'topright'))
 
         self.add_control(ipyleaflet.FullScreenControl(position = 'topright'))
 
-        self.add_control(ipyleaflet.LayersControl(position = 'topleft'))
+        draw_control = ipyleaflet.DrawControl(position = 'topright')
 
-        self.add_control(ipyleaflet.DrawControl(position = 'topright'))
+        draw_control.polyline =  {
+            "shapeOptions": {
+            "color": "#6bc2e5",
+            "weight": 8,
+            "opacity": 0.5
+                        }  
+                 }
+        draw_control.polygon = {
+            "shapeOptions": {
+            "fillColor": "#6be5c3",
+            "color": "#6be5c3",
+            "fillOpacity": 0.1
+        },
+            "drawError": {
+            "color": "#dd253b",
+            "message": "Oups!"
+        },
+          "allowIntersection": False
+       }
+        draw_control.circle = {
+            "shapeOptions": {
+            "fillColor": "#efed69",
+            "color": "#efed69",
+            "fillOpacity": 0.1
+        }
+        }
+        draw_control.rectangle = {
+            "shapeOptions": {
+             "fillColor": "#fca45d",
+             "color": "#fca45d",
+             "fillOpacity": 0.1
+        }
+        }
 
-        self.add_control(ipyleaflet.SearchControl(position="topleft",
-                         url='https://nominatim.openstreetmap.org/search?format=json&q={s}',
-                         zoom = 10 ,
-                         marker = ipyleaflet.Marker(icon=ipyleaflet.AwesomeIcon(name="check", marker_color='green', icon_color='darkgreen'))
-                         ))
+        self.add_control(draw_control)
 
-    def add_basemap(self, basemap):
+        measure = ipyleaflet.MeasureControl( 
+                                            position='topright', 
+                                            active_color = 'orange',
+                                            primary_length_unit = 'kilometers',
+                                            secondary_length_unit = ('miles'),
+                                            secondary_area_unit = ('acres')
+                                           )
+
+        measure.add_area_unit('Sq Kilometers', 1e-6,4)
+        measure.primary_area_unit = ('Sq Kilometers')
+
+        self.add_control(measure)
+
+class AddWidget(ipyleaflet.WidgetControl):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         
-        if basemap == 'Google_Map':
+class AddLegend(ipyleaflet.LegendControl ):
 
-            basemap = ipyleaflet.TileLayer(
-                url = 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-                attribution='Google',
-                name='Google Map'
-            )
-            self.add_layer(basemap)
+    def __init__(self, legend, *args, name="Legend", **kwargs):
+        super().__init__(legend, *args, name=name, **kwargs)
 
-        elif basemap == 'Google_Satellite':
+class TileLayer(ipyleaflet.TileLayer):
 
-            basemap = ipyleaflet.TileLayer(
-              url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-              attribution="Google",
-              name="Google Satellite",
-            )
-            self.add_layer(basemap)
-        
-        return Map
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+class SplitMap(ipyleaflet.SplitMapControl):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+
+
+
+  
+
 
 
 
