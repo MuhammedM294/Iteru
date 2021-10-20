@@ -1,3 +1,4 @@
+from ipyleaflet import TileLayer
 
 basemaps = {
     "Google Road Map": TileLayer(

@@ -1,7 +1,9 @@
 """Main module."""
 
 import ipyleaflet 
-import ee 
+import ee
+import os
+from .common import *
 
 
 
@@ -117,6 +119,7 @@ class SplitMap(ipyleaflet.SplitMapControl):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
 
 
 
