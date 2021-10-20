@@ -1,4 +1,4 @@
-from ipyleaflet import TileLayer
+from ipyleaflet import TileLayer, basemaps, basemap_to_tiles
 
 basemaps = {
     "Google Road Map": TileLayer(
@@ -65,5 +65,69 @@ basemaps = {
         url="https://services.arcgisonline.com/arcgis/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}",
         attribution="Esri",
         name="Esri Physical Map",
-    )
+    ),
+
+    "Open Street Map (Black&White)": basemap_to_tiles(basemaps.OpenStreetMap.BlackAndWhite),
+
+    "Open Street Map (France)": basemap_to_tiles(basemaps.OpenStreetMap.France),
+
+    "Open Street Map Hot": basemap_to_tiles(basemaps.OpenStreetMap.HOT),
+      
+    "Open Topo Map": basemap_to_tiles(basemaps.OpenTopoMap),
+
+    "Gaode Normal": basemap_to_tiles(basemaps.Gaode.Normal),
+
+    "Gaode Satellite":  basemap_to_tiles(basemaps.Gaode.Satellite),
+
+    "Hydda Full":  basemap_to_tiles(basemaps.Hydda.Full),
+
+    "Hydda Base": basemap_to_tiles(basemaps.Hydda.Base),
+
+    "Esri World Street Map":  basemap_to_tiles(basemaps.Esri.WorldStreetMap),
+
+    "Esri Delorme":  basemap_to_tiles(basemaps.Esri.DeLorme),
+
+    "Esri World Topo Map":  basemap_to_tiles(basemaps.Esri.WorldTopoMap),
+
+    "Esri World Imagery " : basemap_to_tiles(basemaps.Esri.WorldImagery),
+
+    "Esri NatGeoWorld Map": basemap_to_tiles (basemaps.Esri.NatGeoWorldMap),
+
+    "HikeBike.HikeBike":  basemap_to_tiles(basemaps.HikeBike.HikeBike), 
+
+     "MtbMap":  basemap_to_tiles(basemaps.MtbMap), 
+
+     "CartoDB Positron": basemap_to_tiles(basemaps.CartoDB.Positron), 
+
+     "CartoDB DarkMatter":   basemap_to_tiles(basemaps.CartoDB.DarkMatter), 
+
+     "NASAGIBS ModisTerraTrueColorCR":  basemap_to_tiles(basemaps.NASAGIBS.ModisTerraTrueColorCR) , 
+
+     "NASAGIBS ModisTerraBands367CR":  basemap_to_tiles(basemaps.NASAGIBS.ModisTerraBands367CR), 
+
+     "NASAGIBS ModisTerraBands721CR":  basemap_to_tiles(basemaps.NASAGIBS.ModisTerraBands721CR), 
+
+     "NASAGIBS ModisAquaTrueColorCR":  basemap_to_tiles(basemaps.NASAGIBS.ModisAquaTrueColorCR), 
+
+     "NASAGIBS ModisAquaBands721CR":  basemap_to_tiles(basemaps.NASAGIBS.ModisAquaBands721CR), 
+
+     "NASAGIBS ViirsTrueColorCR":   basemap_to_tiles(basemaps.NASAGIBS.ViirsTrueColorCR),
+
+     "NASAGIBS ViirsEarthAtNight2012": basemap_to_tiles(basemaps.NASAGIBS.ViirsEarthAtNight2012),
+
+     "Strava.All":  basemap_to_tiles(basemaps.Strava.All), 
+
+     "Strava.Ride":  basemap_to_tiles(basemaps.Strava.Ride), 
+
+     "Strava Run": basemap_to_tiles(basemaps.Strava.Run), 
+
+     "Strava Water":   basemap_to_tiles(basemaps.Strava.Water), 
+
+     "Strava.Winter": basemap_to_tiles(basemaps.Strava.Winter), 
+
+     "Stamen Terrain":  basemap_to_tiles(basemaps.Stamen.Terrain), 
+
+     "Stamen Toner":  basemap_to_tiles(basemaps.Stamen.Toner) , 
+
+     "Stamen Watercolor":  basemap_to_tiles(basemaps.Stamen.Watercolor)
 } 
