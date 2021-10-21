@@ -95,39 +95,39 @@ basemaps = {
 
     "HikeBike.HikeBike":  basemap_to_tiles(basemaps.HikeBike.HikeBike), 
 
-     "MtbMap":  basemap_to_tiles(basemaps.MtbMap), 
+    "MtbMap":  basemap_to_tiles(basemaps.MtbMap), 
 
-     "CartoDB Positron": basemap_to_tiles(basemaps.CartoDB.Positron), 
+    "CartoDB Positron": basemap_to_tiles(basemaps.CartoDB.Positron), 
 
-     "CartoDB DarkMatter":   basemap_to_tiles(basemaps.CartoDB.DarkMatter), 
+    "CartoDB DarkMatter":   basemap_to_tiles(basemaps.CartoDB.DarkMatter), 
 
-     "NASAGIBS ModisTerraTrueColorCR":  basemap_to_tiles(basemaps.NASAGIBS.ModisTerraTrueColorCR) , 
+    "NASAGIBS ModisTerraTrueColorCR":  basemap_to_tiles(basemaps.NASAGIBS.ModisTerraTrueColorCR) , 
 
-     "NASAGIBS ModisTerraBands367CR":  basemap_to_tiles(basemaps.NASAGIBS.ModisTerraBands367CR), 
+    "NASAGIBS ModisTerraBands367CR":  basemap_to_tiles(basemaps.NASAGIBS.ModisTerraBands367CR), 
 
-     "NASAGIBS ModisTerraBands721CR":  basemap_to_tiles(basemaps.NASAGIBS.ModisTerraBands721CR), 
+    "NASAGIBS ModisTerraBands721CR":  basemap_to_tiles(basemaps.NASAGIBS.ModisTerraBands721CR), 
 
-     "NASAGIBS ModisAquaTrueColorCR":  basemap_to_tiles(basemaps.NASAGIBS.ModisAquaTrueColorCR), 
+    "NASAGIBS ModisAquaTrueColorCR":  basemap_to_tiles(basemaps.NASAGIBS.ModisAquaTrueColorCR), 
 
-     "NASAGIBS ModisAquaBands721CR":  basemap_to_tiles(basemaps.NASAGIBS.ModisAquaBands721CR), 
+    "NASAGIBS ModisAquaBands721CR":  basemap_to_tiles(basemaps.NASAGIBS.ModisAquaBands721CR), 
 
-     "NASAGIBS ViirsTrueColorCR":   basemap_to_tiles(basemaps.NASAGIBS.ViirsTrueColorCR),
+    "NASAGIBS ViirsTrueColorCR":   basemap_to_tiles(basemaps.NASAGIBS.ViirsTrueColorCR),
 
-     "NASAGIBS ViirsEarthAtNight2012": basemap_to_tiles(basemaps.NASAGIBS.ViirsEarthAtNight2012),
+    "NASAGIBS ViirsEarthAtNight2012": basemap_to_tiles(basemaps.NASAGIBS.ViirsEarthAtNight2012),
 
-     "Strava.All":  basemap_to_tiles(basemaps.Strava.All), 
+    "Strava.All":  basemap_to_tiles(basemaps.Strava.All), 
 
-     "Strava.Ride":  basemap_to_tiles(basemaps.Strava.Ride), 
+    "Strava.Ride":  basemap_to_tiles(basemaps.Strava.Ride), 
 
-     "Strava Run": basemap_to_tiles(basemaps.Strava.Run), 
+    "Strava Run": basemap_to_tiles(basemaps.Strava.Run), 
 
-     "Strava Water":   basemap_to_tiles(basemaps.Strava.Water), 
+    "Strava Water":   basemap_to_tiles(basemaps.Strava.Water), 
 
-     "Strava.Winter": basemap_to_tiles(basemaps.Strava.Winter), 
+    "Strava.Winter": basemap_to_tiles(basemaps.Strava.Winter), 
 
-     "Stamen Terrain":  basemap_to_tiles(basemaps.Stamen.Terrain), 
+    "Stamen Terrain":  basemap_to_tiles(basemaps.Stamen.Terrain), 
 
-     "Stamen Toner":  basemap_to_tiles(basemaps.Stamen.Toner) , 
+    "Stamen Toner":  basemap_to_tiles(basemaps.Stamen.Toner) , 
 
-     "Stamen Watercolor":  basemap_to_tiles(basemaps.Stamen.Watercolor)
+    "Stamen Watercolor":  basemap_to_tiles(basemaps.Stamen.Watercolor)
 } 
