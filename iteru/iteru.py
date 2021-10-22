@@ -101,6 +101,7 @@ class Map(ipyleaflet.Map):
         self.add_control(measure)
 
     def addLayer(self, ee_image_object, vis_params, name):
+        pass
         
 
 class AddWidget(ipyleaflet.WidgetControl):
