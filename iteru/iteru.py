@@ -100,6 +100,9 @@ class Map(ipyleaflet.Map):
 
         self.add_control(measure)
 
+    def addLayer(self, ee_image_object, vis_params, name):
+        
+
 class AddWidget(ipyleaflet.WidgetControl):
 
     def __init__(self, **kwargs):
@@ -119,7 +122,6 @@ class SplitMap(ipyleaflet.SplitMapControl):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
 
 
 
