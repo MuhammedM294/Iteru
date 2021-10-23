@@ -100,8 +100,21 @@ class Map(ipyleaflet.Map):
 
         self.add_control(measure)
 
-    def addLayer(self, ee_image_object, vis_params, name):
-        pass
+    def add_ee_layer(self, ee_object, vis_params = None, name ='ee layer'):
+        
+        ee_object_id =ee_object.getMapId(vis_params)
+
+        ee_object_tile = TileLayer(
+        
+              url = ee_object_id['tile_fetcher'].url_format,
+              attribution = 'Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
+              name = name, 
+              overlay = True,
+              control = True
+        )
+        self.add_layer(ee_object_tile)
+
+    
         
 
 class AddWidget(ipyleaflet.WidgetControl):
