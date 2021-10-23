@@ -104,7 +104,7 @@ class Map(ipyleaflet.Map):
         
         ee_object_id =ee_object.getMapId(vis_params)
 
-        ee_object_tile = TileLayer(
+        ee_object_tile = ipyleaflet.TileLayer(
         
               url = ee_object_id['tile_fetcher'].url_format,
               attribution = 'Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
