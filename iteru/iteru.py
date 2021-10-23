@@ -114,9 +114,7 @@ class Map(ipyleaflet.Map):
         )
         self.add_layer(ee_object_tile)
 
-    
         
-
 class AddWidget(ipyleaflet.WidgetControl):
 
     def __init__(self, **kwargs):

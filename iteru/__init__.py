@@ -8,3 +8,5 @@ __version__ = '0.0.1'
 from .iteru import *
 from .basemaps import *
 from .common import *
+ee.Initialize() 
+from .GEEDataset import *
