@@ -4,7 +4,7 @@ basemaps = {
     "Google Road Map": TileLayer(
         url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
         attribution="Google",
-        name="Google Maps",
+        name="Google Road Map",
     ),
     "Google Terrain": TileLayer(
         url="https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}",
@@ -14,7 +14,7 @@ basemaps = {
     "Google Hybrid": TileLayer(
         url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
         attribution="Google",
-        name="Google Satellite",
+        name="Google Hybrid",
     ),
     "ESRI": TileLayer(
         url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
