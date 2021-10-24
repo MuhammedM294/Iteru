@@ -98,7 +98,23 @@ class Map(ipyleaflet.Map):
         measure.add_area_unit('Sq Kilometers', 1e-6,4)
         measure.primary_area_unit = ('Sq Kilometers')
 
-        self.add_control(measure)      
+        self.add_control(measure)  
+
+
+    def add_ee_layer(self, ee_object, vis_params=None, name = ''):
+
+        map_id_dict = ee.Image(ee_object).getMapId(vis_params) 
+        
+        ee_object_tile = ipyleaflet.TileLayer(
+
+            url=map_id_dict['tile_fetcher'].url_format,
+            attr='Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
+            name=name,
+            overlay=True,
+            control=True
+        )
+        self.add_layer(ee_object_tile)
+    
 class AddWidget(ipyleaflet.WidgetControl):
 
     def __init__(self, **kwargs):
