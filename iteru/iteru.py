@@ -3,7 +3,7 @@
 import ipyleaflet 
 import ee
 import os
-
+from ipywidgets import *
 
 
 
@@ -98,23 +98,7 @@ class Map(ipyleaflet.Map):
         measure.add_area_unit('Sq Kilometers', 1e-6,4)
         measure.primary_area_unit = ('Sq Kilometers')
 
-        self.add_control(measure)
-
-    def add_ee_layer(self, ee_object, vis_params = None, name ='ee layer'):
-        
-        ee_object_id =ee_object.getMapId(vis_params)
-
-        ee_object_tile = ipyleaflet.TileLayer(
-        
-              url = ee_object_id['tile_fetcher'].url_format,
-              attribution = 'Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
-              name = name, 
-              overlay = True,
-              control = True
-        )
-        self.add_layer(ee_object_tile)
-
-        
+        self.add_control(measure)      
 class AddWidget(ipyleaflet.WidgetControl):
 
     def __init__(self, **kwargs):
@@ -136,7 +120,19 @@ class SplitMap(ipyleaflet.SplitMapControl):
         super().__init__(**kwargs)
 
 
+def ee_tilelayer(ee_object, vis_params = None, name ='ee layer'):
+        
+        ee_object_id =ee_object.getMapId(vis_params)
 
+        ee_object_tile = ipyleaflet.TileLayer(
+        
+              url = ee_object_id['tile_fetcher'].url_format,
+              attribution = 'Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
+              name = name, 
+              overlay = True,
+              control = True
+        )
+        return ee_object_tile
 
 
   
