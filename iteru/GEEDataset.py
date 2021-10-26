@@ -1,5 +1,5 @@
 import ee 
-from .iteru import *
+from ipywidgets import *
 
 
 
@@ -103,7 +103,13 @@ terrain = {
 
                                                    ee.ImageCollection("JAXA/ALOS/AW3D30/V3_2")
 
-                                                       
-                                                    
-
 }
+
+terrain = Dropdown(
+                     options = terrain,
+                     value = None,
+                     description = '',
+                     description_tooltip = 'GEE Terrain Dataset',
+                     layout=Layout(width='200px'),
+                     style = {'description_width': 'initial'}
+             )

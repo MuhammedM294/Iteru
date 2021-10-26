@@ -1,4 +1,6 @@
 from ipyleaflet import TileLayer, basemaps, basemap_to_tiles
+from ipywidgets import *
+
 
 basemaps = {
     "Google Road Map": TileLayer(
@@ -131,3 +133,12 @@ basemaps = {
 
     "Stamen Watercolor":  basemap_to_tiles(basemaps.Stamen.Watercolor)
 } 
+
+basemaps = Dropdown(
+                     options = basemaps,
+                     value = None,
+                     description = '',
+                     description_tooltip = 'Select Basemap',
+                     layout=Layout(width='200px'),
+                     style = {'description_width': 'initial'}
+               )
