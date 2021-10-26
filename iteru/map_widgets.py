@@ -5,7 +5,7 @@ from .GEEDataset import *
 
 
 basemaps = Dropdown(
-                     options = basemaps,
+                     options = basemaps_dataset,
                      value = None,
                      description = '',
                      description_tooltip = 'Select Basemap',

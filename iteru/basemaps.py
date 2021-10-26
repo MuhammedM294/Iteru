@@ -3,7 +3,7 @@ from ipyleaflet import TileLayer, basemaps, basemap_to_tiles
 from ipywidgets import*
 
 
-basemaps = {
+basemaps_dataset = {
     "Google Road Map": TileLayer(
         url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
         attribution="Google",

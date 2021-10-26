@@ -6,11 +6,51 @@ import os
 from ipywidgets import *
 from .map_widgets import *
 from .common import *
+from IPython.display import display
+
+ 
+class AddWidget(ipyleaflet.WidgetControl):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+class AddLegend(ipyleaflet.LegendControl ):
+
+    def __init__(self, legend, *args, name="Legend", **kwargs):
+        super().__init__(legend, *args, name=name, **kwargs)
+
+class TileLayer(ipyleaflet.TileLayer):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+class SplitMap(ipyleaflet.SplitMapControl):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
+def ee_tilelayer(ee_object, vis_params = None, name ='ee layer'):
+        
+        ee_object_id =ee_object.getMapId(vis_params)
+
+        ee_object_tile = ipyleaflet.TileLayer(
+        
+              url = ee_object_id['tile_fetcher'].url_format,
+              attribution = 'Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
+              name = name, 
+              overlay = True,
+              control = True
+        )
+        return ee_object_tile
+
+
+basemap_tool_widget = AddWidget(widget = basemap_tool, position = 'topleft')
+terrain_dataset_tool_widget = AddWidget(widget = terrain_dataset_tool, position = 'topleft')
+TOC_widget = AddWidget(widget = TOC_container, position = 'topleft')
 
 class Map(ipyleaflet.Map):
-
+    
     def __init__(self,**kwargs):
 
         Map.zoom_control = False
@@ -101,6 +141,9 @@ class Map(ipyleaflet.Map):
         measure.primary_area_unit = ('Sq Kilometers')
 
         self.add_control(measure)  
+        self.add_control(basemap_tool_widget)
+        self.add_control(terrain_dataset_tool_widget)
+        self.add_control(TOC_widget )
 
 
     def add_ee_layer(self, ee_object, vis_params=None, name = ''):
@@ -116,48 +159,6 @@ class Map(ipyleaflet.Map):
             control=True
         )
         self.add_layer(ee_object_tile)
-    
-class AddWidget(ipyleaflet.WidgetControl):
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        
-class AddLegend(ipyleaflet.LegendControl ):
-
-    def __init__(self, legend, *args, name="Legend", **kwargs):
-        super().__init__(legend, *args, name=name, **kwargs)
-
-class TileLayer(ipyleaflet.TileLayer):
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-class SplitMap(ipyleaflet.SplitMapControl):
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-
-def ee_tilelayer(ee_object, vis_params = None, name ='ee layer'):
-        
-        ee_object_id =ee_object.getMapId(vis_params)
-
-        ee_object_tile = ipyleaflet.TileLayer(
-        
-              url = ee_object_id['tile_fetcher'].url_format,
-              attribution = 'Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
-              name = name, 
-              overlay = True,
-              control = True
-        )
-        return ee_object_tile
-
-
-basemap_tool_widget = AddWidget(widget = basemap_tool, position = 'topleft')
-terrain_dataset_tool_widget = AddWidget(widget = terrain_dataset_tool, position = 'topleft')
-TOC_widget = AddWidget(widget = TOC_container, position = 'topleft')
-
-
-
 
     
+        
