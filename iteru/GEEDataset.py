@@ -2,7 +2,6 @@ import ee
 from ipywidgets import *
 
 
-
 terrain = { 
 
     
@@ -105,11 +104,3 @@ terrain = {
 
 }
 
-terrain = Dropdown(
-                     options = terrain,
-                     value = None,
-                     description = '',
-                     description_tooltip = 'GEE Terrain Dataset',
-                     layout=Layout(width='200px'),
-                     style = {'description_width': 'initial'}
-             )

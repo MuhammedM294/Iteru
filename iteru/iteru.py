@@ -4,6 +4,8 @@ import ipyleaflet
 import ee
 import os
 from ipywidgets import *
+from .map_widgets import *
+from .common import *
 
 
 
@@ -151,7 +153,9 @@ def ee_tilelayer(ee_object, vis_params = None, name ='ee layer'):
         return ee_object_tile
 
 
-  
+basemap_tool_widget = AddWidget(widget = basemap_tool, position = 'topleft')
+terrain_dataset_tool_widget = AddWidget(widget = terrain_dataset_tool, position = 'topleft')
+TOC_widget = AddWidget(widget = TOC_container, position = 'topleft')
 
 
 
