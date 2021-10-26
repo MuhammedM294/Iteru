@@ -148,7 +148,7 @@ class Map(ipyleaflet.Map):
 
     def add_ee_layer(self, ee_object, vis_params=None, name = ''):
 
-        map_id_dict = ee.Image(ee_object).getMapId(vis_params) 
+        map_id_dict = ee_object.getMapId(vis_params) 
         
         ee_object_tile = ipyleaflet.TileLayer(
 
