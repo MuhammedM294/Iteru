@@ -23,8 +23,6 @@ terrain = Dropdown(
              )
 
 
-#******************************************************************************************#
-
 
 basemaps_button = ToggleButton(
                                value = False, 
@@ -46,13 +44,12 @@ TOC = ToggleButton(
        )
 
 
-#******************************************************************************************#
 basemap_tool = HBox([basemaps_button])
 terrain_dataset_tool = HBox([terrain_dataset_button])
 TOC_container = HBox([TOC])
 TOC_out = Output(layout={'border': '1px solid blue'})
 
-#******************************************************************************************#
+
 
 def basemap_tool_click(change):
     if change.new:
@@ -74,10 +71,10 @@ def TOC_container_click(change):
     else:
         TOC_container.children = [TOC]     
 
-#******************************************************************************************#
-TOC.observe(TOC_container_click, names = 'value')
+
 basemaps_button.observe(basemap_tool_click, names = 'value')
 terrain_dataset_button.observe(terrain_tool_click, names = 'value')
+TOC.observe(TOC_container_click, names = 'value')
 
-#******************************************************************************************#
+
 
