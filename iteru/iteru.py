@@ -1,5 +1,6 @@
 """Main module."""
 
+
 import ipyleaflet 
 import ee
 import os
@@ -10,7 +11,22 @@ from .Map_Widgets import *
 from .common import *
 from IPython.display import display
 
+
+def ee_tilelayer(ee_object, vis_params = None, name ='ee layer'):
         
+        ee_object_id =ee_object.getMapId(vis_params)
+
+        ee_object_tile = ipyleaflet.TileLayer(
+        
+              url = ee_object_id['tile_fetcher'].url_format,
+              attribution = 'Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
+              name = name, 
+              overlay = True,
+              control = True
+        )
+        return ee_object_tile     
+
+    
 class Map(ipyleaflet.Map):
     
     def __init__(self,**kwargs):
@@ -103,9 +119,84 @@ class Map(ipyleaflet.Map):
         measure.primary_area_unit = ('Sq Kilometers')
 
         self.add_control(measure)  
+
+        basemap_tool_widget = ipyleaflet.WidgetControl(widget = basemap_tool, position = 'topleft')
+        terrain_dataset_tool_widget = ipyleaflet.WidgetControl(widget = terrain_dataset_tool, position = 'topleft')
+        TOC_widget = ipyleaflet.WidgetControl(widget = TOC_container, position = 'topleft') 
+
+        
         self.add_control(basemap_tool_widget)
         self.add_control(terrain_dataset_tool_widget)
         self.add_control(TOC_widget )
+
+
+        def layer_widgets(change):
+            if change.new:
+                if type(change.new) is ee.image.Image:
+                    layer = ee_tilelayer(change.new)
+                    name = change.new.getInfo()['id']
+                
+                elif type(change.new) is ipyleaflet.leaflet.TileLayer:
+                     layer = change.new
+                     name = change.new.name
+                
+            if layer in self.layers:
+                pass
+            else:  
+                self.add_layer(layer)
+            
+                close_button = Button(  
+                                value = False, 
+                                tooltip = 'Remove This Layer',
+                                icon = 'window-close',
+                                layout = Layout(width = '32px', height = '28px'),   
+                )
+
+                layer_visibility = Checkbox(
+                               value = True, 
+                               indent=False,
+                               layout = Layout(width = '15px')
+                )
+                
+                layer_name = Label(
+                                   value= name,
+                                   layout = Layout(width = '150px', height = '28px'),
+                                   tooltip = name
+               )
+                opacity = FloatSlider(
+                                      value = 1,
+                                      min = 0,  
+                                      max = 1,
+                                      step = 0.1,
+                                      indent=False,   
+               )
+            def change_layer_visibility(show_hide):
+                layer.visible = show_hide 
+                    
+            def change_layer_opacity(Opacity):
+                layer.opacity = Opacity
+                        
+            def remove_layer(b):
+                self.remove_layer(layer)
+                close_button.close()
+                opacity.close()
+                layer_name.close()
+                layer_visibility.close()
+                
+            opacity_slider = interactive(change_layer_opacity,Opacity = opacity)
+                
+            visibility_checkbox = interactive(change_layer_visibility,show_hide = layer_visibility)
+                
+            with TOC_out:
+                
+                display(HBox([layer_visibility,layer_name,opacity, close_button]))
+                   
+            close_button.on_click(remove_layer) 
+            
+        basemaps.observe(layer_widgets, names = 'value')
+        terrain.observe(layer_widgets, names= 'value')
+    
+    
 
 
     def add_ee_layer(self, ee_object, vis_params=None, name = ''):
@@ -124,23 +215,9 @@ class Map(ipyleaflet.Map):
 
 
 
-def ee_tilelayer(ee_object, vis_params = None, name ='ee layer'):
-        
-        ee_object_id =ee_object.getMapId(vis_params)
-
-        ee_object_tile = ipyleaflet.TileLayer(
-        
-              url = ee_object_id['tile_fetcher'].url_format,
-              attribution = 'Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
-              name = name, 
-              overlay = True,
-              control = True
-        )
-        return ee_object_tile
 
 
-basemap_tool_widget = ipyleaflet.WidgetControl(widget = basemap_tool, position = 'topleft')
-terrain_dataset_tool_widget = ipyleaflet.WidgetControl(widget = terrain_dataset_tool, position = 'topleft')
-TOC_widget = ipyleaflet.WidgetControl(widget = TOC_container, position = 'topleft')   
+
+
     
         
