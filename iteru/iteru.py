@@ -23,8 +23,7 @@ def ee_tilelayer(ee_object, vis_params = None, name =''):
               control = True
         )
         return ee_object_tile     
-
-    
+  
 class Map(ipyleaflet.Map):
     
     def __init__(self,**kwargs):
@@ -122,6 +121,13 @@ class Map(ipyleaflet.Map):
         self.add_control(terrain_dataset_tool_widget)
         self.add_control(TOC_widget )
 
+        def add_to_map(change):
+            if change.new:
+                self.add_layer_widgets(change.new)
+
+        basemaps.observe(add_to_map, names = 'value')
+        terrain.observe(add_to_map, names = 'value')  
+
     def add_layer_widgets(self, object, vis_params = None, name =None):
         try:
             if type(object) is ee.image.Image:
@@ -187,15 +193,9 @@ class Map(ipyleaflet.Map):
             close_button.on_click(remove_layer) 
         
         except Exception:
-             print(f'layer already on map:{layer}')
-
-    def layer_widgets(self, change):
-        if change.new:
-            self.add_layer_widgets(change)
-            
-    basemaps.observe(layer_widgets, names = 'value')
-    terrain.observe(layer_widgets, names= 'value')
-
+            pass
+            #print(f'layer already on the map: {layer}')
+       
     def zoom_to (self,ee_object, zoom = 8):
         
             try:
@@ -208,7 +208,6 @@ class Map(ipyleaflet.Map):
                 self.zoom = 5
                 print('Error: can not get the centroid of the Object')    
     
-
     def add_ee_layer(self, ee_object, vis_params=None, name = ''):
 
         map_id_dict = ee_object.getMapId(vis_params) 
@@ -223,11 +222,6 @@ class Map(ipyleaflet.Map):
         )
         self.add_layer(ee_object_tile)
 
-
-
-
-
-
-
     
-        
+
+
