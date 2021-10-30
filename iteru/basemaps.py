@@ -19,11 +19,6 @@ basemaps_dataset = {
         attribution="Google",
         name="Google Hybrid",
     ),
-    "ESRI": TileLayer(
-        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        attribution="Esri",
-        name="Esri Satellite",
-    ),
     "Esri Ocean": TileLayer(
         url="https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}",
         attribution="Esri",
@@ -69,6 +64,10 @@ basemaps_dataset = {
         attribution="Esri",
         name="Esri Physical Map",
     ),
+    
+    "Esri World Street Map":  basemap_to_tiles(basemaps.Esri.WorldStreetMap),
+
+    "Esri Delorme":  basemap_to_tiles(basemaps.Esri.DeLorme),
 
     "Open Street Map (Black&White)": basemap_to_tiles(basemaps.OpenStreetMap.BlackAndWhite),
 
@@ -85,16 +84,6 @@ basemaps_dataset = {
     "Hydda Full":  basemap_to_tiles(basemaps.Hydda.Full),
 
     "Hydda Base": basemap_to_tiles(basemaps.Hydda.Base),
-
-    "Esri World Street Map":  basemap_to_tiles(basemaps.Esri.WorldStreetMap),
-
-    "Esri Delorme":  basemap_to_tiles(basemaps.Esri.DeLorme),
-
-    "Esri World Topo Map":  basemap_to_tiles(basemaps.Esri.WorldTopoMap),
-
-    "Esri World Imagery " : basemap_to_tiles(basemaps.Esri.WorldImagery),
-
-    "Esri NatGeoWorld Map": basemap_to_tiles (basemaps.Esri.NatGeoWorldMap),
 
     "HikeBike.HikeBike":  basemap_to_tiles(basemaps.HikeBike.HikeBike), 
 
