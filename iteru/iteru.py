@@ -130,7 +130,7 @@ class Map(ipyleaflet.Map):
 
     def add_layer_widgets(self, object, vis_params = None, name =None):
         try:
-            if type(object) is ee.image.Image:
+            if type(object) is ee.image.Image or type(object) is ee.imagecollection.ImageCollection :
                 layer = ee_tilelayer(object,vis_params)
                 if name is None:
                    name = object.getInfo()['id']

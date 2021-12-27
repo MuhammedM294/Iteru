@@ -71,6 +71,40 @@ terrain_dataset_tool_widget = WidgetControl(widget = terrain_dataset_tool, posit
 TOC_widget = WidgetControl(widget = TOC_container, position = 'topleft')
 
 
-        
+# first try for the visualiztion parametrs
+#image with muliple bands
+vis_params = {'bands':['B5','B4','B3'], 'min':None, 'max':None, 'gamma':[0.95,1.1,1]}
+vis_min = BoundedFloatText(value=0,min=0,max=1000,step=0.1,layout = Layout(width = '140px'))
+vis_max = BoundedFloatText(value=10,min=0,max=1000,step=0.1,layout = Layout(width = '140px') )                   
+vis_gamma_b1 = BoundedFloatText(value=None, min=0,max=10,step=0.1,layout = Layout(width = '140px'))
+vis_gamma_b2 = BoundedFloatText(value=None, min=0,max=10,step=0.1,layout = Layout(width = '140px'))
+vis_gamma_b3 = BoundedFloatText(value=None, min=0,max=10,step=0.1,layout = Layout(width = '140px'))
+band1= Dropdown(options=['B1','B2','B3','B4','B5','B6','B7','B8','B9'],layout = Layout(width = '150px'))
+band2= Dropdown(options=['B1','B2','B3','B4','B5','B6','B7','B8','B9'],layout = Layout(width = '150px'))
+band3= Dropdown(options=['B1','B2','B3','B4','B5','B6','B7','B8','B9'],layout = Layout(width = '150px'))
+apply = Button(description='Apply',button_style ='info', layout = Layout(width = '100px'))
+
+def bands(b1,b2,b3):
+    vis_params['bands'][0]=b1
+    vis_params['bands'][1]=b2
+    vis_params['bands'][2]=b3
+    
+def gamma_value(gamma_b1,gamma_b2,gamma_b3):
+  
+    vis_params['gamma'][0] = gamma_b1
+    vis_params['gamma'][1] = gamma_b2
+    vis_params['gamma'][2] = gamma_b3
+    
+def min_max_value(min_value,max_value):
+    vis_params['min'] = min_value
+    vis_params['max'] = max_value
+     
+bands_widgets = interactive(bands, b1 = band1, b2 = band2, b3 = band3)
+values_widgest = interactive(min_max_value, min_value = vis_min, max_value = vis_max )
+gamma_w = interactive(gamma_value,gamma_b1 = vis_gamma_b1, gamma_b2 = vis_gamma_b2,gamma_b3=vis_gamma_b3)
+bands_widgets = HBox([band1,band2,band3])
+gamma_widgets = HBox([vis_gamma_b1,vis_gamma_b2,vis_gamma_b3])
+values_widgets = HBox([vis_min,vis_max])
+      
                  
             
