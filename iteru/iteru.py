@@ -107,6 +107,12 @@ class Map(ipyleaflet.Map):
         self.draw_control = draw_control
         self.last_draw = draw_control.last_draw
         self.last_action = draw_control.last_action
+        def handle_draw(self,target,action,geo_json):
+            self.last_draw = geo_json
+            self.last_action = action
+            self.draw_control_target = target
+        self.draw_control.on_draw(handle_draw)
+        self.last_draw_coordinates = draw_control.last_draw['geometry']['coordinates']
 
         measure = ipyleaflet.MeasureControl( 
                                             position='topright', 
