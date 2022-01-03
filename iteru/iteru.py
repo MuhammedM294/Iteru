@@ -102,8 +102,10 @@ class Map(ipyleaflet.Map):
              "fillOpacity": 0.1
         }
         }
-
+        
         self.add_control(draw_control)
+        self.last_draw = draw_control.last_draw
+        self.last_action = draw_control.last_action
 
         measure = ipyleaflet.MeasureControl( 
                                             position='topright', 
