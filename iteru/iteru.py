@@ -104,6 +104,7 @@ class Map(ipyleaflet.Map):
         }
         
         self.add_control(draw_control)
+        self.draw_control = draw_control
         self.last_draw = draw_control.last_draw
         self.last_action = draw_control.last_action
 
