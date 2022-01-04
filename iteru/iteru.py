@@ -11,7 +11,7 @@ from IPython.display import display
 
 
 class Map(ipyleaflet.Map):
-    """ Inherting the Map class for Ipyleaflet with the all its methods and attributes
+    """ Inherting the Map class from Ipyleaflet with the all its methods and attributes
 
     """
 
