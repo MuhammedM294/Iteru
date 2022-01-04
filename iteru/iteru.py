@@ -1,6 +1,7 @@
-"""Main module."""
+"""The main module for the interactive mapping based on Google Earth Enigne Python API and Ipyleaflet Package """
 
 
+from inspect import CORO_CREATED
 import ipyleaflet
 import ee
 from ipywidgets import *
@@ -10,6 +11,9 @@ from IPython.display import display
 
 
 class Map(ipyleaflet.Map):
+    """ Inherting the Map class for Ipyleaflet with the all its methods and attributes
+
+    """
 
     def __init__(self, **kwargs):
 
@@ -101,6 +105,10 @@ class Map(ipyleaflet.Map):
             elif self.last_draw['geometry']['type'] == 'Point':
                 self.aoi = ee.Geometry.Point(
                     self.last_draw['geometry']['coordinates'])
+            elif self.last_draw['geometry']['type'] == 'LineString':
+                self.aoi = ee.Geometry.LineString(
+                    self.last_draw['geometry']['coordinates'])
+
         self.draw_control.on_draw(handle_draw)
 
         measure = ipyleaflet.MeasureControl(
@@ -113,8 +121,8 @@ class Map(ipyleaflet.Map):
 
         measure.add_area_unit('Sq Kilometers', 1e-6, 4)
         measure.primary_area_unit = ('Sq Kilometers')
-
         self.add_control(measure)
+
         self.add_control(basemap_tool_widget)
         self.add_control(terrain_dataset_tool_widget)
         self.add_control(TOC_widget)
@@ -125,6 +133,17 @@ class Map(ipyleaflet.Map):
 
         basemaps.observe(add_to_map, names='value')
         terrain.observe(add_to_map, names='value')
+
+        # add coordinates of the mousemove to the map
+        coordinates = HTML()
+
+        def handle_interaction(**kwargs):
+            if kwargs.get('type') == 'mousemove':
+                coordinates.value = str(kwargs.get('coordinates'))
+        self.on_interaction(handle_interaction)
+        coordinates_widget = WidgetControl(
+            widget=coordinates, position='bottomleft')
+        self.add_control(coordinates_widget)
 
     def add_layer_widgets(self, object, vis_params=None, name=None):
         try:
@@ -225,7 +244,7 @@ class Map(ipyleaflet.Map):
 
 
 def ee_tilelayer(ee_object, vis_params=None, name=''):
-    
+
     ee_object_id = ee_object.getMapId(vis_params)
 
     ee_object_tile = ipyleaflet.TileLayer(
