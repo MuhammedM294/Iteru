@@ -256,3 +256,19 @@ def ee_tilelayer(ee_object, vis_params=None, name=''):
         control=True
     )
     return ee_object_tile
+
+
+def get_vis_params(collection):
+    """[A fucntion to get the visualiztions paramters of GEE ImageCollection Feature]
+
+    Args:
+        collection ([ImageCollection]): [GEE ImageColelction]
+
+    Returns:
+        [dict]: [Visualization paramters ]
+    """
+    min = float(collection.getInfo()['properties']['visualization_0_min'])
+    max = float(collection.getInfo()['properties']['visualization_0_max'])
+    bands = collection.getInfo(
+    )['properties']['visualization_0_bands'].split(',')
+    return {'min': min, 'max': max, 'bands': bands}
