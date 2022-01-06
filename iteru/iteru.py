@@ -4,6 +4,7 @@
 from inspect import CORO_CREATED
 import ipyleaflet
 import ee
+from ipyleaflet.leaflet import TileLayer
 from ipywidgets import *
 from .gui_widgets import *
 from .common import *
@@ -18,7 +19,7 @@ class Map(ipyleaflet.Map):
     def __init__(self, **kwargs):
 
         Map.zoom_control = False
-
+        self.basemap = basemaps_dataset["Google Hybrid"]
         if 'center' not in kwargs:
             kwargs['center'] = [27, 31]
 
@@ -259,7 +260,7 @@ def ee_tilelayer(ee_object, vis_params=None, name=''):
 
 
 def get_vis_params(collection):
-    """[A fucntion to get the visualiztions paramters of GEE ImageCollection Feature]
+    """A fucntion to get the visualiztions paramters of GEE ImageCollection Feature
 
     Args:
         collection ([ImageCollection]): [GEE ImageColelction]
