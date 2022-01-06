@@ -136,11 +136,23 @@ class Map(ipyleaflet.Map):
         terrain.observe(add_to_map, names='value')
 
         # add coordinates of the mousemove to the map
+        def from_decimal_to_degree(angle):
+            degrees = int(angle)
+            minutes = (angle - degrees)*60
+            seconds = (minutes - int(minutes)) * 60
+            return f"{degrees}°{int(minutes)}'{seconds:.4f}”"
+
         coordinates = HTML()
 
         def handle_interaction(**kwargs):
             if kwargs.get('type') == 'mousemove':
-                coordinates.value = str(kwargs.get('coordinates'))
+                coordinates.value = f"""
+                                    <b>Lat</b>: {from_decimal_to_degree(float(str(kwargs.get('coordinates')[0])))}
+                                    <br>
+                                    <b>Long</b>: {from_decimal_to_degree(float(str(kwargs.get('coordinates')[1])))}
+                                    <br>
+                                    <b>Zoom Level</b>: {int(self.zoom)}
+                """
         self.on_interaction(handle_interaction)
         coordinates_widget = WidgetControl(
             widget=coordinates, position='bottomleft')
@@ -148,12 +160,12 @@ class Map(ipyleaflet.Map):
 
     def add_layer_widgets(self, object, vis_params=None, name=None):
         try:
-            if type(object) is ee.image.Image or type(object) is ee.imagecollection.ImageCollection:
+            if isinstance(object, ee.Image) or isinstance(object, ee.ImageCollection):
                 layer = ee_tilelayer(object, vis_params)
                 if name is None:
                     name = object.getInfo()['id']
 
-            elif type(object) is ipyleaflet.leaflet.TileLayer:
+            elif isinstance(object, TileLayer):
                 layer = object
                 if name is None:
                     name = object.name
