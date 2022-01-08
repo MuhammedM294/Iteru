@@ -285,3 +285,14 @@ def get_vis_params(collection):
     bands = collection.getInfo(
     )['properties']['visualization_0_bands'].split(',')
     return {'min': min, 'max': max, 'bands': bands}
+
+
+def add_DATE_to_imgcol(img):
+    return img.set({"DATE": ee.Date(img.get("system:time_start")).format('YYYY-MM-dd')})
+
+
+def get_imgCol_dates(col):
+    col = col.map(add_DATE_to_imgcol)
+    return col.aggregate_array('DATE').getInfo()
+
+
