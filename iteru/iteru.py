@@ -9,6 +9,7 @@ from ipywidgets import *
 from .gui_widgets import *
 from .common import *
 from IPython.display import display
+import datetime
 
 
 class Map(ipyleaflet.Map):
@@ -60,15 +61,15 @@ class Map(ipyleaflet.Map):
 
         draw_control.polyline = {
             "shapeOptions": {
-                "color": "#6bc2e5",
+                "color": "blue",
                 "weight": 8,
                 "opacity": 0.5
             }
         }
         draw_control.polygon = {
             "shapeOptions": {
-                "fillColor": "#6be5c3",
-                "color": "#6be5c3",
+                "fillColor": "blue",
+                "color": "red",
                 "fillOpacity": 0.1
             },
             "drawError": {
@@ -79,15 +80,15 @@ class Map(ipyleaflet.Map):
         }
         draw_control.circle = {
             "shapeOptions": {
-                "fillColor": "#efed69",
-                "color": "#efed69",
+                "fillColor": "blue",
+                "color": "red",
                 "fillOpacity": 0.1
             }
         }
         draw_control.rectangle = {
             "shapeOptions": {
-                "fillColor": "#fca45d",
-                "color": "#fca45d",
+                "fillColor": "blue",
+                "color": "red",
                 "fillOpacity": 0.1
             }
         }
@@ -287,12 +288,29 @@ def get_vis_params(collection):
     return {'min': min, 'max': max, 'bands': bands}
 
 
-def add_DATE_to_imgcol(img):
+def add_dates_to_imgcol(img):
     return img.set({"DATE": ee.Date(img.get("system:time_start")).format('YYYY-MM-dd')})
 
 
 def get_imgCol_dates(col):
-    col = col.map(add_DATE_to_imgcol)
+    col = col.map(add_dates_to_imgcol)
     return col.aggregate_array('DATE').getInfo()
 
 
+def get_dates_list(start_date, end_date, time_delta=30):
+
+    days = [start_date]
+
+    while start_date < end_date:
+        end_day = start_date + datetime.timedelta(days=time_delta)
+        days.append(end_day)
+        start_date = end_day
+
+    while (end_date - days[-1]).days < time_delta:
+        days.pop()
+    days_dates = []
+
+    for date in days:
+        days_dates.append(f'{date.year}-{date.month}-{date.day}')
+
+    return days_dates
