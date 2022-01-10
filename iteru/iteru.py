@@ -31,7 +31,7 @@ class Map(ipyleaflet.Map):
             kwargs['scroll_wheel_zoom'] = True
 
         if 'height' not in kwargs:
-            self.layout.height = '550px'
+            self.layout.height = '500px'
         else:
             self.layout.height = kwargs['height']
 
