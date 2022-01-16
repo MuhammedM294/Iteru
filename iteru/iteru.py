@@ -1,6 +1,8 @@
 """The main module for the interactive mapping based on Google Earth Enigne Python API and Ipyleaflet Package """
 
 
+import os
+import string
 from inspect import CORO_CREATED
 import ipyleaflet
 import ee
@@ -9,7 +11,6 @@ from ipywidgets import *
 from .gui_widgets import *
 from .common import *
 from IPython.display import display
-import datetime
 
 
 class Map(ipyleaflet.Map):
@@ -299,6 +300,8 @@ def get_imgCol_dates(col):
 
 def get_dates_list(start_date, end_date, time_delta=30):
 
+    import datetime
+
     days = [start_date]
 
     while start_date < end_date:
@@ -314,3 +317,179 @@ def get_dates_list(start_date, end_date, time_delta=30):
         days_dates.append(f'{date.year}-{date.month}-{date.day}')
 
     return days_dates
+
+
+def sentinel_2_sr_timeseries(aoi, start_year=2021, start_month=1, start_day=1, end_year=2022, end_month=1, end_day=1,
+                             time_delta=30, CLOUD_FILTER=40, CLD_PRB_THRESH=70, NIR_DRK_THRESH=0.15, CLD_PRJ_DIST=1,
+                             BUFFER=50):
+    import datetime
+
+    start_date = datetime.date(start_year, start_month, start_day)
+    end_date = datetime.date(end_year, end_month, end_day)
+
+    ee_start_date = f'{start_year}-{start_month}-{start_day}'
+    ee_end_date = f'{end_year}-{end_month}-{end_day}'
+
+    dates_list = get_dates_list(start_date, end_date, time_delta)
+
+    def get_s2_sr_cld_col(aoi, ee_start_date, ee_end_date, CLOUD_FILTER):
+
+        s2_sr_col = (ee.ImageCollection('COPERNICUS/S2_SR')
+                     .filterBounds(aoi)
+                     .filterDate(ee_start_date, ee_end_date)
+                     .filter(ee.Filter.lte('CLOUDY_PIXEL_PERCENTAGE', CLOUD_FILTER)))
+
+        s2_cloudless_col = (ee.ImageCollection('COPERNICUS/S2_CLOUD_PROBABILITY')
+                            .filterBounds(aoi)
+                            .filterDate(ee_start_date, ee_end_date))
+
+        return ee.ImageCollection(ee.Join.saveFirst('s2cloudless').apply(**{
+            'primary': s2_sr_col,
+            'secondary': s2_cloudless_col,
+            'condition': ee.Filter.equals(**{
+                'leftField': 'system:index',
+                'rightField': 'system:index'
+            })
+        }))
+
+    s2_sr_cld_col_eval = get_s2_sr_cld_col(
+        aoi, ee_start_date, ee_end_date, CLOUD_FILTER)
+
+    def add_cloud_bands(img):
+        cld_prb = ee.Image(img.get('s2cloudless')).select('probability')
+        is_cloud = cld_prb.gt(CLD_PRB_THRESH).rename('clouds')
+        return img.addBands(ee.Image([cld_prb, is_cloud]))
+
+    def add_shadow_bands(img):
+        not_water = img.select('SCL').neq(6)
+
+        SR_BAND_SCALE = 1e4
+        dark_pixels = img.select('B8').lt(
+            NIR_DRK_THRESH*SR_BAND_SCALE).multiply(not_water).rename('dark_pixels')
+
+        shadow_azimuth = ee.Number(90).subtract(
+            ee.Number(img.get('MEAN_SOLAR_AZIMUTH_ANGLE')))
+
+        cld_proj = (img.select('clouds').directionalDistanceTransform(shadow_azimuth, CLD_PRJ_DIST*10)
+                                        .reproject(**{'crs': img.select(0).projection(), 'scale': 100})
+                                        .select('distance')
+                                        .mask()
+                                        .rename('cloud_transform'))
+
+        shadows = cld_proj.multiply(dark_pixels).rename('shadows')
+
+        return img.addBands(ee.Image([dark_pixels, cld_proj, shadows]))
+
+    def add_cld_shdw_mask(img):
+        img_cloud = add_cloud_bands(img)
+
+        img_cloud_shadow = add_shadow_bands(img_cloud)
+
+        is_cld_shdw = img_cloud_shadow.select('clouds').add(
+            img_cloud_shadow.select('shadows')).gt(0)
+
+        is_cld_shdw = (is_cld_shdw.focalMin(2).focalMax(BUFFER*2/20)
+                       .reproject(**{'crs': img.select([0]).projection(), 'scale': 20})
+                       .rename('cloudmask'))
+
+        return img_cloud_shadow.addBands(is_cld_shdw)
+
+    def apply_cld_shdw_mask(img):
+        not_cld_shdw = img.select('cloudmask').Not()
+
+        return img.select('B.*').updateMask(not_cld_shdw).clip(aoi)
+
+    s2_sr_cld_col_eval = s2_sr_cld_col_eval.map(
+        add_cld_shdw_mask).map(apply_cld_shdw_mask)
+
+    def get_images(day_date):
+
+        start_day = ee.Date(day_date)
+        end_day = start_day.advance(time_delta, 'day')
+
+        return s2_sr_cld_col_eval.filterDate(start_day, end_day).reduce(ee.Reducer.median())
+
+    images = ee.List(dates_list).map(get_images)
+    collection = ee.ImageCollection.fromImages(images)
+
+    return collection
+
+
+def get_gif(url):
+
+    import requests
+    import os
+
+    r = requests.get(url, stream=True)
+    out_dir = os.path.join(os.path.expanduser("~"), "Downloads")
+    filename = "TimeSeries_" + random_string() + ".gif"
+    out_gif = os.path.join(out_dir, filename)
+
+    with open(out_gif, 'wb') as file:
+        for chunk in r.iter_content(chunk_size=1024):
+            file.write(chunk)
+
+    return out_gif
+
+
+def random_string(string_length=4):
+    import random
+    import string
+
+    letters = string.ascii_uppercase
+    return "".join(random.choice(letters) for i in range(string_length))
+
+
+def add_text_to_gif(out_gif, dates_list, dates_font_size=25, dates_font_color='red', framesPerSecond=4):
+
+    from PIL import Image, ImageDraw, ImageFont, ImageSequence
+    import io
+
+    gif = Image.open(out_gif)
+    count = gif.n_frames
+
+    width, height = gif.size
+    dates_text_xy = (int(0.001 * width), int(0.001 * height))
+    copywrite_xy = (int(0.001 * width), int(0.95 * height))
+
+    dates_text = dates_list
+    copywrite = '©Muhammed Abdelaal, 2022'
+    dates_text_font = ImageFont.truetype(
+        r'C:\Users\muham\Downloads\News 705 Italic BT\News 705 Italic BT.ttf', dates_font_size)
+    copywrite_font = ImageFont.truetype(
+        r'C:\Users\muham\Downloads\News 705 Italic BT\News 705 Italic BT.ttf', 15)
+
+    frames = []
+
+    for index, frame in enumerate(ImageSequence.Iterator(gif)):
+        frame = frame.convert("RGB")
+        draw = ImageDraw.Draw(frame)
+        draw.text(dates_text_xy, dates_text[index],
+                  fill=dates_font_color, font=dates_text_font)
+        draw.text(copywrite_xy, copywrite, fill="black", font=copywrite_font)
+        b = io.BytesIO()
+        frame.save(b, format="GIF")
+        frame = Image.open(b)
+        frames.append(frame)
+
+    frames[0].save(
+        out_gif,
+        save_all=True,
+        append_images=frames[1:],
+        duration=int(1000/framesPerSecond),
+        loop=0,
+        optimize=True,
+    )
+
+
+def display_gif(out_gif):
+
+    from ipywidgets import Image
+
+    out = Output()
+    out.clear_output(wait=True)
+    display(out)
+    with out:
+        with open(out_gif, 'rb') as file:
+            image = file.read()
+        display(Image(value=image))
