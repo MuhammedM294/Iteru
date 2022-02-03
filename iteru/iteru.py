@@ -466,7 +466,7 @@ def add_text_to_gif(out_gif, dates_list, dates_font_size=25, dates_font_color='r
         draw = ImageDraw.Draw(frame)
         draw.text(dates_text_xy, dates_text[index],
                   fill=dates_font_color, font=dates_text_font)
-        draw.text(copywrite_xy, copywrite, fill="black", font=copywrite_font)
+        draw.text(copywrite_xy, copywrite, fill="white", font=copywrite_font)
         b = io.BytesIO()
         frame.save(b, format="GIF")
         frame = Image.open(b)
