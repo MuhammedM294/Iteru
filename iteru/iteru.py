@@ -1,16 +1,16 @@
 """The main module for the interactive mapping based on Google Earth Enigne Python API and Ipyleaflet Package """
 
 
+from IPython.display import display
+from .common import *
+from .gui_widgets import *
+from ipywidgets import *
+from ipyleaflet.leaflet import TileLayer
 import os
 import string
 from inspect import CORO_CREATED
 import ipyleaflet
 import ee
-from ipyleaflet.leaflet import TileLayer
-from ipywidgets import *
-from .gui_widgets import *
-from .common import *
-from IPython.display import display
 
 
 class Map(ipyleaflet.Map):
@@ -154,7 +154,26 @@ class Map(ipyleaflet.Map):
                                     <b>Long</b>: {from_decimal_to_degree(float(str(kwargs.get('coordinates')[1])))}
                                     <br>
                                     <b>Zoom Level</b>: {int(self.zoom)}
-                """
+                                    """
+            if kwargs.get('type') == 'click':
+                JAXA = ee.ImageCollection(
+                    'JAXA/ALOS/AW3D30/V3_2').select('DSM').median()
+                lat = float(str(kwargs.get('coordinates')[0]))
+                long = float(str(kwargs.get('coordinates')[1]))
+                point_elevation = JAXA.reduceRegion(
+                    reducer=ee.Reducer.mean(),
+                    geometry=ee.Geometry.Point(long, lat),
+                    scale=10,).getInfo()
+                coordinates.value = f"""
+                                    <b>Lat</b>: {from_decimal_to_degree(float(str(kwargs.get('coordinates')[0])))}
+                                    <br>
+                                    <b>Long</b>: {from_decimal_to_degree(float(str(kwargs.get('coordinates')[1])))}
+                                    <br>
+                                    <b>Zoom Level</b>: {int(self.zoom)}
+                                    <br>
+                                    <b>Elevation</b>:{point_elevation['DSM']}
+                                    """
+
         self.on_interaction(handle_interaction)
         coordinates_widget = WidgetControl(
             widget=coordinates, position='bottomleft')
