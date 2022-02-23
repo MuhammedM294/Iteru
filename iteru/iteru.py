@@ -330,6 +330,7 @@ def get_dates_list(start_date, end_date, time_delta=30):
 
     while (end_date - days[-1]).days < time_delta:
         days.pop()
+        
     days_dates = []
 
     for date in days:
@@ -415,3 +416,29 @@ def display_gif(out_gif):
         with open(out_gif, 'rb') as file:
             image = file.read()
         display(Image(value=image))
+        
+        
+#Sentinel_2_Cloud_Masking
+
+def get_s2_sr_cld_col(aoi, ee_start_date, ee_end_date, CLOUD_FILTER):
+    
+    s2_sr_col = (ee.ImageCollection('COPERNICUS/S2_SR')
+                 .filterBounds(aoi)
+                 .filterDate(ee_start_date, ee_end_date)
+                 .filter(ee.Filter.lte('CLOUDY_PIXEL_PERCENTAGE', CLOUD_FILTER)))
+
+    s2_cloudless_col = (ee.ImageCollection('COPERNICUS/S2_CLOUD_PROBABILITY')
+                        .filterBounds(aoi)
+                        .filterDate(ee_start_date, ee_end_date))
+
+    return ee.ImageCollection(ee.Join.saveFirst('s2cloudless').apply(**{
+        'primary': s2_sr_col,
+        'secondary': s2_cloudless_col,
+        'condition': ee.Filter.equals(**{
+            'leftField': 'system:index',
+            'rightField': 'system:index'
+        })
+    }))
+    
+    
+
