@@ -330,13 +330,14 @@ def get_dates_list(start_date, end_date, time_delta=30):
 
     while (end_date - days[-1]).days < time_delta:
         days.pop()
-        
+
     days_dates = []
 
     for date in days:
         days_dates.append(f'{date.year}-{date.month}-{date.day}')
 
     return days_dates
+
 
 def get_gif(url):
 
@@ -389,7 +390,7 @@ def add_text_to_gif(out_gif, dates_list, dates_font_size=25, dates_font_color='r
         draw = ImageDraw.Draw(frame)
         draw.text(dates_text_xy, dates_text[index],
                   fill=dates_font_color, font=dates_text_font)
-        draw.text(copywrite_xy, copywrite, fill="white", font=copywrite_font)
+        draw.text(copywrite_xy, copywrite, fill="black", font=copywrite_font)
         b = io.BytesIO()
         frame.save(b, format="GIF")
         frame = Image.open(b)
@@ -416,12 +417,12 @@ def display_gif(out_gif):
         with open(out_gif, 'rb') as file:
             image = file.read()
         display(Image(value=image))
-        
-        
-#Sentinel_2_Cloud_Masking
+
+
+# Sentinel_2_Cloud_Masking
 
 def get_s2_sr_cld_col(aoi, ee_start_date, ee_end_date, CLOUD_FILTER):
-    
+
     s2_sr_col = (ee.ImageCollection('COPERNICUS/S2_SR')
                  .filterBounds(aoi)
                  .filterDate(ee_start_date, ee_end_date)
@@ -439,6 +440,9 @@ def get_s2_sr_cld_col(aoi, ee_start_date, ee_end_date, CLOUD_FILTER):
             'rightField': 'system:index'
         })
     }))
-    
-    
 
+
+def addRatioBand(img):
+    ratio_band = img.select('VV').divide(img.select('VH')).rename('VV/VH')
+
+    return img.addBands(ratio_band)
