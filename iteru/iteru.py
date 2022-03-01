@@ -11,6 +11,7 @@ import string
 from inspect import CORO_CREATED
 import ipyleaflet
 import ee
+import datetime
 
 
 class Map(ipyleaflet.Map):
@@ -317,28 +318,6 @@ def get_imgCol_dates(col):
     return col.aggregate_array('DATE').getInfo()
 
 
-def get_dates_list(start_date, end_date, time_delta=30):
-
-    import datetime
-
-    days = [start_date]
-
-    while start_date < end_date:
-        end_day = start_date + datetime.timedelta(days=time_delta)
-        days.append(end_day)
-        start_date = end_day
-
-    while (end_date - days[-1]).days < time_delta:
-        days.pop()
-
-    days_dates = []
-
-    for date in days:
-        days_dates.append(f'{date.year}-{date.month}-{date.day}')
-
-    return days_dates
-
-
 def get_gif(url):
 
     import requests
@@ -419,30 +398,218 @@ def display_gif(out_gif):
         display(Image(value=image))
 
 
-# Sentinel_2_Cloud_Masking
-
-def get_s2_sr_cld_col(aoi, ee_start_date, ee_end_date, CLOUD_FILTER):
-
-    s2_sr_col = (ee.ImageCollection('COPERNICUS/S2_SR')
-                 .filterBounds(aoi)
-                 .filterDate(ee_start_date, ee_end_date)
-                 .filter(ee.Filter.lte('CLOUDY_PIXEL_PERCENTAGE', CLOUD_FILTER)))
-
-    s2_cloudless_col = (ee.ImageCollection('COPERNICUS/S2_CLOUD_PROBABILITY')
-                        .filterBounds(aoi)
-                        .filterDate(ee_start_date, ee_end_date))
-
-    return ee.ImageCollection(ee.Join.saveFirst('s2cloudless').apply(**{
-        'primary': s2_sr_col,
-        'secondary': s2_cloudless_col,
-        'condition': ee.Filter.equals(**{
-            'leftField': 'system:index',
-            'rightField': 'system:index'
-        })
-    }))
-
-
 def addRatioBand(img):
     ratio_band = img.select('VV').divide(img.select('VH')).rename('VV/VH')
 
     return img.addBands(ratio_band)
+
+
+def dates_params(startYear=2022, startMonth=1, startDay=1, endYear=2022, endMonth=3, endDay=1):
+
+    if all(isinstance(i, int) for i in [startYear, startMonth, startDay, endYear, endMonth, endDay]):
+
+        valid_startDate = datetime.date(2020, 1, 1)
+        valid_endDate = datetime.date.today()
+        startDate = datetime.date(startYear, startMonth, startDay)
+        ee_startDate = f'{startYear}-{startMonth}-{startDay}'
+        endDate = datetime.date(endYear, endMonth, endDay)
+        ee_endDate = f'{endYear}-{endMonth}-{endDay}'
+
+        if (valid_endDate >= startDate >= valid_startDate) and (valid_endDate >= endDate >= valid_startDate):
+            pass
+        else:
+            try:
+                raise Exception(
+                    f'The start Date and the end Date should be between {valid_startDate} and {valid_endDate}')
+            except Exception as e:
+                print(e)
+            return
+
+        if (endDate - startDate).days < 0:
+            try:
+                raise Exception('The start Date should be before the end date')
+            except Exception as e:
+                print(e)
+            return
+
+        if 0 <= (endDate - startDate).days < 30:
+            try:
+                raise Exception(
+                    'It should be at least one month between the start date and the end date')
+            except Exception as e:
+                print(e)
+            return
+
+        return list([startDate, endDate, ee_startDate, ee_endDate])
+
+    else:
+        try:
+            raise Exception('The date parameters input should be integer')
+        except Exception as e:
+            print(e)
+        return
+
+
+def get_dates_sequence(start_date, end_date, time_delta=30):
+
+    days = [start_date]
+
+    while start_date < end_date:
+        end_day = start_date + datetime.timedelta(days=24)
+        days.append(end_day)
+        start_date = end_day
+
+    while (end_date - days[-1]).days < time_delta:
+        days.pop()
+
+    days_dates = [f'{date.year}-{date.month}-{date.day}' for date in days]
+
+    return days_dates
+
+
+def S1_SAR_col(startYear, startMonth, startDay, endYear, endMonth, endDay, temp_freq=None):
+
+    try:
+        aoi = ee.Geometry.Polygon([[[
+            35.008243,
+            10.522199
+        ],
+            [
+            35.008243,
+            11.266588
+        ],
+            [
+            35.387092,
+            11.266588
+        ],
+            [
+            35.387092,
+            10.522199
+        ],
+            [
+            35.008243,
+            10.522199
+        ]]])
+
+        if not isinstance(aoi, ee.Geometry):
+
+            raise Exception('The Study Area should ee.Geomtery')
+
+            return
+
+    except Exception as e:
+
+        print(e)
+    try:
+
+        datesVars = dates_params(
+            startYear, startMonth, startDay, endYear, endMonth, endDay)
+
+    except Exception as e:
+        print(e)
+        return
+
+    if datesVars:
+        try:
+
+            SAR = ee.ImageCollection('COPERNICUS/S1_GRD')\
+                .filter(ee.Filter.equals('relativeOrbitNumber_start', 50))\
+                .filter(ee.Filter.eq('instrumentMode', 'IW'))\
+                .filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'))\
+                .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))\
+                .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))\
+                .filter(ee.Filter.eq('resolution_meters', 10))\
+                .filterBounds(aoi)\
+                .filterDate(datesVars[2], datesVars[3])\
+                .select(['VV', 'VH'])\
+                .map(addRatioBand)
+
+        except Exception as e:
+
+            print('Error with Sentinel-1 image collection filtering')
+            return
+
+    if temp_freq is None:
+
+        return SAR
+
+    elif temp_freq == 'monthly':
+
+        dates_sequence = get_dates_sequence(
+            start_date=datesVars[0], end_date=datesVars[1], time_delta=30)
+
+        def get_images_sequence(day):
+
+            start_day = ee.Date(day)
+            end_day = start_day.advance(1, 'month')
+            image = SAR.filterDate(start_day, end_day).median()\
+                       .set({'start_day': start_day.format('YYYY-MM-dd')})\
+                       .set({'end_day': end_day.format('YYYY-MM-dd')})
+            return image
+
+        images = ee.List(dates_sequence).map(get_images_sequence)
+
+        SAR = ee.ImageCollection.fromImages(images)
+
+        return SAR
+
+
+def SAR_timeseries_url(col, aoi, vis_method=None, frame_per_second=2, crs='EPSG:3857', dimensions=900):
+
+    try:
+        if isinstance(col, ee.ImageCollection):
+            pass
+        else:
+            raise Exception('The input should be ee.ImageCollection')
+
+    except Exception as e:
+        print(e)
+
+    try:
+        if isinstance(aoi, ee.Geometry):
+            pass
+        else:
+            raise Exception('The input should be ee.Geometry')
+
+    except Exception as e:
+        print(e)
+
+    if vis_method is None:
+
+        vis_min = [-25, -25, 0]
+        vis_max = [0, 0, 5]
+        bands = ['VV', 'VH', 'VV/VH']
+
+    elif vis_method == 'single_band_VV':
+
+        vis_min = -25,
+        vis_max = 5,
+        bands = ['VV']
+
+    elif vis_method == 'single_band_VH':
+
+        vis_min = -25,
+        vis_max = 5,
+        bands = ['VH']
+
+    videoArgs = {
+
+        'dimensions': dimensions,
+        'region': aoi,
+        'framesPerSecond': frame_per_second,
+        'crs': crs,
+        'min': vis_min,
+        'max': vis_max,
+        'bands': bands
+    }
+
+    try:
+
+        url = col.getVideoThumbURL(videoArgs)
+
+        return url
+
+    except Exception:
+
+        print('The number of requested images exceeded the memory limit. Please, redcue the dates limit')
+        return
