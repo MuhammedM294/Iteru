@@ -467,29 +467,32 @@ def get_dates_sequence(start_date, end_date, time_delta=30):
     return days_dates
 
 
-def S1_SAR_col(startYear, startMonth, startDay, endYear, endMonth, endDay, temp_freq=None):
+GERD_aoi = ee.Geometry.Polygon([[[
+    35.008243,
+    10.522199
+],
+    [
+    35.008243,
+    11.266588
+],
+    [
+    35.387092,
+    11.266588
+],
+    [
+    35.387092,
+    10.522199
+],
+    [
+    35.008243,
+    10.522199
+]]])
+
+
+def S1_SAR_col(aoi, startYear, startMonth, startDay, endYear, endMonth, endDay, temp_freq=None):
 
     try:
-        aoi = ee.Geometry.Polygon([[[
-            35.008243,
-            10.522199
-        ],
-            [
-            35.008243,
-            11.266588
-        ],
-            [
-            35.387092,
-            11.266588
-        ],
-            [
-            35.387092,
-            10.522199
-        ],
-            [
-            35.008243,
-            10.522199
-        ]]])
+        aoi = GERD_aoi
 
         if not isinstance(aoi, ee.Geometry):
 
