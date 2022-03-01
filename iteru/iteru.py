@@ -398,12 +398,6 @@ def display_gif(out_gif):
         display(Image(value=image))
 
 
-def addRatioBand(img):
-    ratio_band = img.select('VV').divide(img.select('VH')).rename('VV/VH')
-
-    return img.addBands(ratio_band)
-
-
 def dates_params(startYear=2022, startMonth=1, startDay=1, endYear=2022, endMonth=3, endDay=1):
 
     if all(isinstance(i, int) for i in [startYear, startMonth, startDay, endYear, endMonth, endDay]):
@@ -455,7 +449,7 @@ def get_dates_sequence(start_date, end_date, time_delta=30):
     days = [start_date]
 
     while start_date < end_date:
-        end_day = start_date + datetime.timedelta(days=24)
+        end_day = start_date + datetime.timedelta(days=time_delta)
         days.append(end_day)
         start_date = end_day
 
@@ -489,75 +483,144 @@ GERD_aoi = ee.Geometry.Polygon([[[
 ]]])
 
 
+def addRatioBand(img):
+    ratio_band = img.select('VV').divide(img.select('VH')).rename('VV/VH')
+
+    return img.addBands(ratio_band)
+
+
+def filterSpeckles(img):
+
+    VV_smooth = img.select('VV').focal_median(
+        100, 'circle', 'meters').rename('VV_Filtered')
+
+    return img.addBands(VV_smooth)
+
+
+water_threshold = -18
+
+
+def water_classify(img):
+    vv = img.select('VV_Filtered')
+    water = vv.lt(water_threshold).rename('Water')
+    water_mask = water.updateMask(water).rename('Water_mask')
+    return img.addBands([water, water_mask])
+
+
+def rgb_water_mosaic(img):
+
+    img_rgb = img.visualize(
+        **{'min': [-25, -25, 0], 'max': [0, 0, 5], 'bands': ['VV', 'VH', 'VV/VH']})
+
+    water_vis = img.select('Water_mask').visualize(
+        **{'min': 0.5, 'max': 1, 'palette': ['00FFFF', '0000FF']})
+
+    mosaic = ee.ImageCollection([img_rgb, water_vis]).mosaic()
+
+    return mosaic.copyProperties(img, img.propertyNames())
+
+
 def S1_SAR_col(aoi, startYear, startMonth, startDay, endYear, endMonth, endDay, temp_freq=None):
 
     try:
-        aoi = GERD_aoi
 
-        if not isinstance(aoi, ee.Geometry):
+        if aoi is None or not isinstance(aoi, ee.Geometry):
 
             raise Exception('The Study Area should ee.Geomtery')
 
-            return
-
     except Exception as e:
 
         print(e)
-    try:
 
-        datesVars = dates_params(
-            startYear, startMonth, startDay, endYear, endMonth, endDay)
-
-    except Exception as e:
-        print(e)
         return
 
-    if datesVars:
+    else:
+
         try:
 
-            SAR = ee.ImageCollection('COPERNICUS/S1_GRD')\
-                .filter(ee.Filter.equals('relativeOrbitNumber_start', 50))\
-                .filter(ee.Filter.eq('instrumentMode', 'IW'))\
-                .filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'))\
-                .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))\
-                .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))\
-                .filter(ee.Filter.eq('resolution_meters', 10))\
-                .filterBounds(aoi)\
-                .filterDate(datesVars[2], datesVars[3])\
-                .select(['VV', 'VH'])\
-                .map(addRatioBand)
+            datesVars = dates_params(
+                startYear, startMonth, startDay, endYear, endMonth, endDay)
 
         except Exception as e:
-
-            print('Error with Sentinel-1 image collection filtering')
+            print(e)
             return
+        else:
 
-    if temp_freq is None:
+            if datesVars:
 
-        return SAR
+                try:
 
-    elif temp_freq == 'monthly':
+                    SAR = ee.ImageCollection('COPERNICUS/S1_GRD')\
+                        .filter(ee.Filter.equals('relativeOrbitNumber_start', 50))\
+                        .filter(ee.Filter.eq('instrumentMode', 'IW'))\
+                        .filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'))\
+                        .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))\
+                        .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))\
+                        .filter(ee.Filter.eq('resolution_meters', 10))\
+                        .filterBounds(aoi)\
+                        .filterDate(datesVars[2], datesVars[3])\
+                        .select(['VV', 'VH'])\
+                        .map(addRatioBand)
 
-        dates_sequence = get_dates_sequence(
-            start_date=datesVars[0], end_date=datesVars[1], time_delta=30)
+                except Exception:
 
-        def get_images_sequence(day):
+                    print('Error with Sentinel-1 SAR GRD ImageCollection filtering')
+                    return
 
-            start_day = ee.Date(day)
-            end_day = start_day.advance(1, 'month')
-            image = SAR.filterDate(start_day, end_day).median()\
-                       .set({'start_day': start_day.format('YYYY-MM-dd')})\
-                       .set({'end_day': end_day.format('YYYY-MM-dd')})
-            return image
+                else:
+                    if temp_freq is None:
 
-        images = ee.List(dates_sequence).map(get_images_sequence)
+                        global dates_sequence
 
-        SAR = ee.ImageCollection.fromImages(images)
+                        dates_sequence = get_imgCol_dates(SAR)
 
-        return SAR
+                        return SAR, dates_sequence
+
+                    else:
+                        try:
+
+                            if temp_freq == 'monthly':
+
+                                time_delta = 30
+
+                                dates_sequence = get_dates_sequence(
+                                    start_date=datesVars[0], end_date=datesVars[1], time_delta=30)
+
+                            elif temp_freq == 'quarterly':
+
+                                time_delta = 90
+
+                                dates_sequence = get_dates_sequence(
+                                    start_date=datesVars[0], end_date=datesVars[1], time_delta=90)
+
+                            else:
+
+                                raise Exception(
+                                    'Invalid temporal frequency input')
+
+                        except Exception as e:
+                            print(e)
+                            return
+                        else:
+
+                            def get_images_sequence(day):
+
+                                start_day = ee.Date(day)
+                                end_day = start_day.advance(time_delta, 'day')
+                                image = SAR.filterDate(start_day, end_day).median()\
+                                    .set({'start_day': start_day.format('YYYY-MM-dd')})\
+                                    .set({'end_day': end_day.format('YYYY-MM-dd')})
+                                return image
+
+                            images = ee.List(dates_sequence).map(
+                                get_images_sequence)
+
+                            SAR = ee.ImageCollection.fromImages(images)
+
+                            return SAR, dates_sequence
 
 
-def SAR_timeseries_url(col, aoi, vis_method=None, frame_per_second=2, crs='EPSG:3857', dimensions=900):
+def SAR_timeseries_url(col, aoi, vis_method='rgb', frame_per_second=2, crs='EPSG:3857', dimensions=900):
 
     try:
         if isinstance(col, ee.ImageCollection):
@@ -577,42 +640,65 @@ def SAR_timeseries_url(col, aoi, vis_method=None, frame_per_second=2, crs='EPSG:
     except Exception as e:
         print(e)
 
-    if vis_method is None:
-
-        vis_min = [-25, -25, 0]
-        vis_max = [0, 0, 5]
-        bands = ['VV', 'VH', 'VV/VH']
-
-    elif vis_method == 'single_band_VV':
-
-        vis_min = -25,
-        vis_max = 5,
-        bands = ['VV']
-
-    elif vis_method == 'single_band_VH':
-
-        vis_min = -25,
-        vis_max = 5,
-        bands = ['VH']
-
-    videoArgs = {
-
-        'dimensions': dimensions,
-        'region': aoi,
-        'framesPerSecond': frame_per_second,
-        'crs': crs,
-        'min': vis_min,
-        'max': vis_max,
-        'bands': bands
-    }
+    palette = None
+    vis_min = -25,
+    vis_max = 5,
 
     try:
+        if vis_method == 'rgb':
 
-        url = col.getVideoThumbURL(videoArgs)
+            vis_min = [-25, -25, 0]
+            vis_max = [0, 0, 5]
+            bands = ['VV', 'VH', 'VV/VH']
 
-        return url
+        elif vis_method == 'single_band_VV':
+            bands = ['VV']
 
-    except Exception:
+        elif vis_method == 'single_band_VH':
 
-        print('The number of requested images exceeded the memory limit. Please, redcue the dates limit')
+            bands = ['VH']
+
+        elif vis_method == 'water_mask_only':
+
+            col = col.map(filterSpeckles).map(water_classify)
+            bands = ['Water_mask']
+            palette = ['00FFFF', '0000FF']
+
+        elif vis_method == 'rgb_water_mosaic':
+
+            col = col.map(filterSpeckles).map(
+                water_classify).map(rgb_water_mosaic)
+
+            bands = ['vis-red', 'vis-green', 'vis-blue']
+            vis_min = 0
+            vis_max = 255
+        else:
+            raise Exception('Invalid visualization method input')
+
+    except Exception as e:
+        print(e)
         return
+    else:
+
+        videoArgs = {
+            'dimensions': dimensions,
+            'region': aoi,
+            'framesPerSecond': frame_per_second,
+            'crs': crs,
+            'min': vis_min,
+            'max': vis_max,
+            'bands': bands,
+            'palette': palette
+
+        }
+        try:
+
+            url = col.getVideoThumbURL(videoArgs)
+
+            return url
+
+        except Exception:
+
+            print(
+                'The number of requested images exceeded the memory limit. Please, redcue the time interval')
+            return
