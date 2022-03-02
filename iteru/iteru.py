@@ -8,10 +8,11 @@ from ipywidgets import *
 from ipyleaflet.leaflet import TileLayer
 import os
 import string
-from inspect import CORO_CREATED
+#from inspect import CORO_CREATED
 import ipyleaflet
 import ee
 import datetime
+import matplotlib.pyplot as plt
 
 
 class Map(ipyleaflet.Map):
@@ -673,7 +674,8 @@ def SAR_timeseries_url(col, aoi, vis_method='rgb', frame_per_second=2, crs='EPSG
             vis_min = 0
             vis_max = 255
         else:
-            raise Exception('Invalid visualization method input')
+            raise Exception('Invalid visualization method input. The visualization method should be'
+                            '"rgb","singl_band_VV","single_band_VH","water_mask_only" or "rgb_water_mosaic"')
 
     except Exception as e:
         print(e)
@@ -702,3 +704,77 @@ def SAR_timeseries_url(col, aoi, vis_method='rgb', frame_per_second=2, crs='EPSG
             print(
                 'The number of requested images exceeded the memory limit. Please, redcue the time interval')
             return
+
+
+def calc_area(feature):
+
+    area = feature.geometry().area(maxError=1)
+
+    return feature.set({'Area': area})
+
+
+def water_to_vector(img):
+
+    water_mask = img.select('Water_mask').clip(GERD_aoi)
+
+    feature = ee.Image(1).updateMask(water_mask).reduceToVectors(
+        geometry=water_mask.geometry(),
+        crs='EPSG:32636',
+        scale=10,
+        geometryType='polygon',
+        eightConnected=False,
+        labelProperty='water_cover',
+        bestEffort=True
+    )
+    feature = feature.map(calc_area)
+
+    lake_feature = feature.sort('Area', False).first()
+
+    lake_area = lake_feature.geometry().area(maxError=1)
+
+    return ee.FeatureCollection(lake_feature).set({'Area': lake_area})\
+        .copyProperties(img, img.propertyNames())\
+        .copyProperties(lake_feature, lake_feature.propertyNames())
+
+
+elevation_dataset = ee.ImageCollection('JAXA/ALOS/AW3D30/V3_2')\
+    .filter(ee.Filter.bounds(GERD_aoi))\
+    .select('DSM')\
+    .median()\
+    .clip(GERD_aoi)\
+    .reproject(crs='EPSG:32636', scale=30)
+
+
+def max_water_ele(feature):
+
+    lake_dem = elevation_dataset.clip(feature)
+
+    max_ele = lake_dem.reduceRegion(
+        reducer=ee.Reducer.max(),
+        geometry=lake_dem.geometry(),
+        scale=30,
+        crs='EPSG:32636',
+        maxPixels=1e11).get('DSM')
+    return lake_dem.set({'Maximum_water_elevation': max_ele, 'Image_date': feature.get('start_day')})
+
+
+def water_vol(lake_dem):
+
+    elevations = lake_dem.reduceRegion(
+        reducer=ee.Reducer.toList(),
+        geometry=lake_dem.geometry(),
+        maxPixels=1e11,
+        scale=30,
+        crs='EPSG:32636',
+        bestEffort=True
+    ).get('DSM')
+
+    elev_pixles_num = ee.List(elevations).length()
+
+    elev_sum = ee.List(elevations).reduce(ee.Reducer.sum())
+
+    stats = {'Pixels_number': elev_pixles_num,
+             'Elevation_sum': elev_sum
+             }
+
+    return ee.Feature(None, stats)
