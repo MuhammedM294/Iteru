@@ -344,7 +344,12 @@ def random_string(string_length=4):
     return "".join(random.choice(letters) for i in range(string_length))
 
 
-def add_text_to_gif(out_gif, dates_list, dates_font_size=25, dates_font_color='red', framesPerSecond=4):
+def add_text_to_gif(out_gif, dates_list,
+                    dates_font_size=25,
+                    copywrite_font_size=15,
+                    dates_font_color='red',
+                    copywrite_font_color='black',
+                    framesPerSecond=4):
 
     from PIL import Image, ImageDraw, ImageFont, ImageSequence
     import io
@@ -361,7 +366,7 @@ def add_text_to_gif(out_gif, dates_list, dates_font_size=25, dates_font_color='r
     dates_text_font = ImageFont.truetype(
         r'C:\Users\muham\Downloads\News 705 Italic BT\News 705 Italic BT.ttf', dates_font_size)
     copywrite_font = ImageFont.truetype(
-        r'C:\Users\muham\Downloads\News 705 Italic BT\News 705 Italic BT.ttf', 15)
+        r'C:\Users\muham\Downloads\News 705 Italic BT\News 705 Italic BT.ttf', copywrite_font_size)
 
     frames = []
 
@@ -370,7 +375,8 @@ def add_text_to_gif(out_gif, dates_list, dates_font_size=25, dates_font_color='r
         draw = ImageDraw.Draw(frame)
         draw.text(dates_text_xy, dates_text[index],
                   fill=dates_font_color, font=dates_text_font)
-        draw.text(copywrite_xy, copywrite, fill="black", font=copywrite_font)
+        draw.text(copywrite_xy, copywrite,
+                  fill=copywrite_font_color, font=copywrite_font)
         b = io.BytesIO()
         frame.save(b, format="GIF")
         frame = Image.open(b)
@@ -399,7 +405,7 @@ def display_gif(out_gif):
         display(Image(value=image))
 
 
-def dates_params(startYear=2022, startMonth=1, startDay=1, endYear=2022, endMonth=3, endDay=1):
+def dates_params(startYear=2020, startMonth=6, startDay=1, endYear=2022, endMonth=3, endDay=1):
 
     if all(isinstance(i, int) for i in [startYear, startMonth, startDay, endYear, endMonth, endDay]):
 
@@ -454,7 +460,7 @@ def get_dates_sequence(start_date, end_date, time_delta=30):
         days.append(end_day)
         start_date = end_day
 
-    while (end_date - days[-1]).days < time_delta:
+    while (end_date - days[-1]).days < 30:
         days.pop()
 
     days_dates = [f'{date.year}-{date.month}-{date.day}' for date in days]
@@ -492,17 +498,17 @@ def addRatioBand(img):
 
 def filterSpeckles(img):
 
-    VV_smooth = img.select('VV').focal_median(
-        100, 'circle', 'meters').rename('VV_Filtered')
+    VV_smooth = img.select('VH').focal_median(
+        100, 'circle', 'meters').rename('VH_Filtered')
 
     return img.addBands(VV_smooth)
 
 
-water_threshold = -18
+water_threshold = -25.5
 
 
 def water_classify(img):
-    vv = img.select('VV_Filtered')
+    vv = img.select('VH_Filtered')
     water = vv.lt(water_threshold).rename('Water')
     water_mask = water.updateMask(water).rename('Water_mask')
     return img.addBands([water, water_mask])
@@ -511,7 +517,7 @@ def water_classify(img):
 def rgb_water_mosaic(img):
 
     img_rgb = img.visualize(
-        **{'min': [-25, -25, 0], 'max': [0, 0, 5], 'bands': ['VV', 'VH', 'VV/VH']})
+        **{'min': [-35, -35, 0], 'max': [0, 0, 5], 'bands': ['VV', 'VH', 'VV/VH']})
 
     water_vis = img.select('Water_mask').visualize(
         **{'min': 0.5, 'max': 1, 'palette': ['00FFFF', '0000FF']})
@@ -571,11 +577,9 @@ def S1_SAR_col(aoi, startYear, startMonth, startDay, endYear, endMonth, endDay, 
                 else:
                     if temp_freq is None:
 
-                        global dates_sequence
-
                         dates_sequence = get_imgCol_dates(SAR)
 
-                        return SAR, dates_sequence
+                        return [SAR, dates_sequence]
 
                     else:
                         try:
@@ -618,7 +622,7 @@ def S1_SAR_col(aoi, startYear, startMonth, startDay, endYear, endMonth, endDay, 
 
                             SAR = ee.ImageCollection.fromImages(images)
 
-                            return SAR, dates_sequence
+                            return [SAR, dates_sequence]
 
 
 def SAR_timeseries_url(col, aoi, vis_method='rgb', frame_per_second=2, crs='EPSG:3857', dimensions=900):
@@ -642,13 +646,13 @@ def SAR_timeseries_url(col, aoi, vis_method='rgb', frame_per_second=2, crs='EPSG
         print(e)
 
     palette = None
-    vis_min = -25,
+    vis_min = -35,
     vis_max = 5,
 
     try:
         if vis_method == 'rgb':
 
-            vis_min = [-25, -25, 0]
+            vis_min = [-35, -35, 0]
             vis_max = [0, 0, 5]
             bands = ['VV', 'VH', 'VV/VH']
 
@@ -877,3 +881,112 @@ def RefinedLee(img):
     result = dir_mean.add(b.multiply(img.subtract(dir_mean)))
 
     return(result.arrayFlatten([['sum']]))
+
+
+def apply_RefinedLee(img):
+
+    VH_Filtered = ee.Image(
+        toDB(RefinedLee(toNatural(img.select(['VH']))))).rename('VH_Filtered')
+
+    return img.addBands(VH_Filtered)
+
+
+def otsu(histogram):
+
+    counts = ee.Array(ee.Dictionary(histogram).get('histogram'))
+    means = ee.Array(ee.Dictionary(histogram).get('bucketMeans'))
+    size = means.length().get([0])
+    total = counts.reduce(ee.Reducer.sum(), [0]).get([0])
+    sum = means.multiply(counts).reduce(ee.Reducer.sum(), [0]).get([0])
+    mean = sum.divide(total)
+
+    indices = ee.List.sequence(1, size)
+
+    def BSS(i):
+        aCounts = counts.slice(0, 0, i)
+        aCount = aCounts.reduce(ee.Reducer.sum(), [0]).get([0])
+        aMeans = means.slice(0, 0, i)
+        aMean = (
+            aMeans.multiply(aCounts)
+            .reduce(ee.Reducer.sum(), [0])
+            .get([0])
+            .divide(aCount)
+        )
+        bCount = total.subtract(aCount)
+        bMean = sum.subtract(aCount.multiply(aMean)).divide(bCount)
+        return aCount.multiply(aMean.subtract(mean).pow(2)).add(
+            bCount.multiply(bMean.subtract(mean).pow(2))
+        )
+
+    bss = indices.map(BSS)
+
+    return means.sort(bss).get([-1])
+
+
+def addOtsuThreshold(img):
+
+    histogram = img.select('VH_Filtered').reduceRegion(
+        reducer=ee.Reducer.histogram().combine(
+            'mean', None, True).combine('variance', None, True),
+        geometry=GERD_aoi,
+        scale=10,
+        bestEffort=True
+    )
+    otsu_threshold = otsu(histogram.get('VH_Filtered_histogram'))
+
+    water = img.select('VH_Filtered').lt(otsu_threshold).selfMask()
+
+    return water.set({"otsu_threshold": otsu_threshold})
+
+
+def GERD_SAR_timelaspe(aoi = GERD_aoi,
+                     startYear = 2020,
+                     startMonth = 6,
+                     startDay = 1,
+                     endYear = 2020,
+                     endMonth = 6,
+                     endDay = 10,
+                     temp_freq=None, 
+                     vis_method = 'rgb',
+                     frame_per_second=2,
+                     crs='EPSG:3857',
+                     dimensions=900,
+                     dates_font_size = 25,
+                     copywrite_font_size = 15,
+                     dates_font_color = 'red',
+                     copywrite_font_color = 'black',
+                     framesPerSecond = 2,                     
+                    ):
+    try:
+        SAR_col= S1_SAR_col(aoi,startYear,startMonth,startDay,endYear,endMonth,endDay,temp_freq)
+        
+    except Exception as e:
+        print(e)
+        return 
+    else:
+        if isinstance(SAR_col,list):
+            SAR = SAR_col[0]
+            dates_sequences = SAR_col[1]
+            
+            try:
+
+                url = SAR_timeseries_url(SAR,aoi,vis_method, frame_per_second, crs, dimensions)
+                
+            except Exception as e:
+                print(e)
+                return 
+            
+            else:
+
+                out_gif = get_gif(url)
+
+                add_text_to_gif(out_gif, dates_sequences,
+                                dates_font_size,
+                                copywrite_font_size,
+                                dates_font_color,
+                                copywrite_font_color,
+                                framesPerSecond)
+
+                display_gif(out_gif)
+
+    
