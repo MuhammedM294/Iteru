@@ -1017,3 +1017,85 @@ def show_plot(x, y,
     plt.plot(x, y, label=legend_label)
     plt.legend()
     plt.gcf().set_size_inches(18.5, 10.5)
+
+
+def GERD_water_stats(aoi=GERD_aoi,
+                     startYear=2020,
+                     startMonth=6,
+                     startDay=1,
+                     endYear=2022,
+                     endMonth=3,
+                     endDay=10,
+                     temp_freq='monthly',
+                     water_area=True,
+                     water_level=False,
+                     water_volume=False,
+                     ):
+
+    try:
+        SAR_col = S1_SAR_col(aoi, startYear, startMonth,
+                             startDay, endYear, endMonth, endDay, temp_freq)
+
+    except Exception as e:
+        print(e)
+        return
+    else:
+        if isinstance(SAR_col, list):
+            SAR = SAR_col[0]
+            dates_sequences = SAR_col[1]
+
+            try:
+
+                if water_area:
+                    water_vectors = SAR.map(filterSpeckles).map(
+                        water_classify).map(water_to_vector)
+                    water_area = [
+                        area / (1e6) for area in water_vectors.aggregate_array('Area').getInfo()]
+
+                    show_plot(x=dates_sequences,
+                              y=water_area,
+                              x_label='Sentinel_1 SAR Image Date',
+                              y_label='Area (km\u00b2)',
+                              legend_label='Water Surface Area'
+                              )
+                if water_level:
+                    if not water_vectors:
+                        water_vectors = SAR.map(filterSpeckles).map(
+                            water_classify).map(water_to_vector)
+
+                    dems = water_vectors.map(max_water_ele)
+
+                    max_elev = [elev for elev in dems.aggregate_array(
+                        'Maximum_water_elevation').getInfo()]
+                    show_plot(x=dates_sequences,
+                              y=max_elev,
+                              x_label='Sentinel_1 SAR Image Date',
+                              y_label='Water Level (m)',
+                              legend_label='Water Surface level (m) MSL'
+                              )
+
+                if water_volume:
+
+                    if not water_vectors:
+                        water_vectors = SAR.map(filterSpeckles).map(
+                            water_classify).map(water_to_vector)
+                    if not dems:
+                        dems = water_vectors.map(max_water_ele)
+
+                    volume_stats = dems.map(water_vol)
+                    ele_sum = volume_stats.aggregate_array(
+                        'Elevation_sum').getInfo()
+                    pixel_num = volume_stats.aggregate_array(
+                        'Pixels_number').getInfo()
+                    volume = [((water_level*pixles_count-elevations_sum)*900)/(1e9)
+                              for water_level, elevations_sum, pixles_count in zip(max_elev, ele_sum, pixel_num)]
+
+                    show_plot(x=dates_sequences,
+                              y=volume,
+                              x_label='Sentinel_1 SAR Image Date',
+                              y_label='Water Volume (bcm)',
+                              legend_label='Water Volume (bcm)'
+                              )
+
+            except:
+                print('Error! Memory Limit Exceeded')
