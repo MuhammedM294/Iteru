@@ -359,7 +359,7 @@ def add_text_to_gif(out_gif, dates_list,
 
     width, height = gif.size
     dates_text_xy = (int(0.001 * width), int(0.001 * height))
-    copywrite_xy = (int(0.001 * width), int(0.95 * height))
+    copywrite_xy = (int(0.001 * width), int(0.98 * height))
 
     dates_text = dates_list
     copywrite = '©Muhammed Abdelaal, 2022'
@@ -498,20 +498,20 @@ def addRatioBand(img):
 
 def filterSpeckles(img):
 
-    VV_smooth = img.select('VH').focal_median(
+    VH_smooth = img.select('VH').focal_median(
         100, 'circle', 'meters').rename('VH_Filtered')
 
-    return img.addBands(VV_smooth)
+    return img.addBands(VH_smooth)
 
 
-water_threshold = -25.5
+water_threshold = -25
 
 
 def water_classify(img):
     vv = img.select('VH_Filtered')
     water = vv.lt(water_threshold).rename('Water')
     water_mask = water.updateMask(water).rename('Water_mask')
-    return img.addBands([water, water_mask])
+    return img.addBands([water_mask])
 
 
 def rgb_water_mosaic(img):
@@ -706,7 +706,8 @@ def SAR_timeseries_url(col, aoi, vis_method='rgb', frame_per_second=2, crs='EPSG
         except Exception:
 
             print(
-                'The number of requested images exceeded the memory limit. Please, redcue the time interval')
+                'The number of requested images exceeded the memory limit.'
+                'Please, redcue the time period or the GIF dimensions.')
             return
 
 
@@ -759,7 +760,7 @@ def max_water_ele(feature):
         scale=30,
         crs='EPSG:32636',
         maxPixels=1e11).get('DSM')
-    return lake_dem.set({'Maximum_water_elevation': max_ele, 'Image_date': feature.get('start_day')})
+    return lake_dem.set({'Maximum_water_elevation': max_ele})
 
 
 def water_vol(lake_dem):
@@ -939,54 +940,80 @@ def addOtsuThreshold(img):
     return water.set({"otsu_threshold": otsu_threshold})
 
 
-def GERD_SAR_timelaspe(aoi = GERD_aoi,
-                     startYear = 2020,
-                     startMonth = 6,
-                     startDay = 1,
-                     endYear = 2020,
-                     endMonth = 6,
-                     endDay = 10,
-                     temp_freq=None, 
-                     vis_method = 'rgb',
-                     frame_per_second=2,
-                     crs='EPSG:3857',
-                     dimensions=900,
-                     dates_font_size = 25,
-                     copywrite_font_size = 15,
-                     dates_font_color = 'red',
-                     copywrite_font_color = 'black',
-                     framesPerSecond = 2,                     
-                    ):
+def GERD_SAR_timelaspe(aoi=GERD_aoi,
+                       startYear=2020,
+                       startMonth=6,
+                       startDay=1,
+                       endYear=2020,
+                       endMonth=6,
+                       endDay=10,
+                       temp_freq=None,
+                       vis_method='rgb',
+                       crs='EPSG:3857',
+                       dimensions=900,
+                       dates_font_size=25,
+                       copywrite_font_size=15,
+                       dates_font_color='red',
+                       copywrite_font_color='black',
+                       framesPerSecond=2,
+                       ):
     try:
-        SAR_col= S1_SAR_col(aoi,startYear,startMonth,startDay,endYear,endMonth,endDay,temp_freq)
-        
+        SAR_col = S1_SAR_col(aoi, startYear, startMonth,
+                             startDay, endYear, endMonth, endDay, temp_freq)
+
     except Exception as e:
         print(e)
-        return 
+        return
     else:
-        if isinstance(SAR_col,list):
+        if isinstance(SAR_col, list):
             SAR = SAR_col[0]
             dates_sequences = SAR_col[1]
-            
+
             try:
 
-                url = SAR_timeseries_url(SAR,aoi,vis_method, frame_per_second, crs, dimensions)
-                
+                url = SAR_timeseries_url(
+                    SAR, aoi, vis_method, framesPerSecond, crs, dimensions)
+
             except Exception as e:
                 print(e)
-                return 
-            
+                return
+
             else:
+                if url:
 
-                out_gif = get_gif(url)
+                    out_gif = get_gif(url)
 
-                add_text_to_gif(out_gif, dates_sequences,
-                                dates_font_size,
-                                copywrite_font_size,
-                                dates_font_color,
-                                copywrite_font_color,
-                                framesPerSecond)
+                    add_text_to_gif(out_gif, dates_sequences,
+                                    dates_font_size,
+                                    copywrite_font_size,
+                                    dates_font_color,
+                                    copywrite_font_color,
+                                    framesPerSecond)
 
-                display_gif(out_gif)
+                    display_gif(out_gif)
 
-    
+
+def show_plot(x, y,
+              x_label, y_label,
+              xlabel_fontsize=15,
+              ylabel_fontsize=18,
+              xticks_rotation=90,
+              figwitdth=10,
+              figheight=7,
+              style='fivethirtyeight',
+              grid_status=True,
+              legend_label=None
+              ):
+
+    import matplotlib.pyplot as plt
+    plt.style.use(style)
+    f = plt.figure()
+    f.set_figwidth(figwitdth)
+    f.set_figheight(figheight)
+    plt.xlabel(x_label, fontsize=xlabel_fontsize)
+    plt.ylabel(y_label, fontsize=ylabel_fontsize)
+    plt.grid(grid_status)
+    plt.xticks(rotation=xticks_rotation)
+    plt.plot(x, y, label=legend_label)
+    plt.legend()
+    plt.gcf().set_size_inches(18.5, 10.5)
