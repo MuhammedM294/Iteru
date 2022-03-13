@@ -8,7 +8,6 @@ from ipywidgets import *
 from ipyleaflet.leaflet import TileLayer
 import os
 import string
-#from inspect import CORO_CREATED
 import ipyleaflet
 import ee
 import datetime
@@ -23,7 +22,7 @@ class Map(ipyleaflet.Map):
     def __init__(self, **kwargs):
 
         Map.zoom_control = False
-        self.basemap = basemaps_dataset["Google Hybrid"]
+        #self.basemap = basemaps_dataset["Google Hybrid"]
         if 'center' not in kwargs:
             kwargs['center'] = [27, 31]
 
@@ -128,16 +127,11 @@ class Map(ipyleaflet.Map):
         measure.primary_area_unit = ('Sq Kilometers')
         self.add_control(measure)
 
-        self.add_control(basemap_tool_widget)
-        self.add_control(terrain_dataset_tool_widget)
         self.add_control(TOC_widget)
 
         def add_to_map(change):
             if change.new:
                 self.add_layer_widgets(change.new)
-
-        basemaps.observe(add_to_map, names='value')
-        terrain.observe(add_to_map, names='value')
 
         # add coordinates of the mousemove to the map
         def from_decimal_to_degree(angle):
