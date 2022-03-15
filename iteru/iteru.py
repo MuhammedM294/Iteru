@@ -1090,4 +1090,4 @@ def GERD_water_stats(aoi=GERD_aoi,
                 return water_stats
 
             except:
-                print('Error! Memory Limit Exceeded')
+                print('Error! Memory Limit Exceeded.')
