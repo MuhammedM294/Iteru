@@ -5,9 +5,6 @@ from IPython.display import display
 from .common import *
 from .gui_widgets import *
 from ipywidgets import *
-from ipyleaflet.leaflet import TileLayer
-import os
-import string
 import ipyleaflet
 import ee
 import datetime
@@ -22,7 +19,6 @@ class Map(ipyleaflet.Map):
     def __init__(self, **kwargs):
 
         Map.zoom_control = False
-        #self.basemap = basemaps_dataset["Google Hybrid"]
         if 'center' not in kwargs:
             kwargs['center'] = [27, 31]
 
@@ -182,7 +178,7 @@ class Map(ipyleaflet.Map):
                 if name is None:
                     name = object.getInfo()['id']
 
-            elif isinstance(object, TileLayer):
+            elif isinstance(object, ipyleaflet.TileLayer):
                 layer = object
                 if name is None:
                     name = object.name
@@ -1019,7 +1015,7 @@ def GERD_water_stats(aoi=GERD_aoi,
                      startDay=1,
                      endYear=2022,
                      endMonth=3,
-                     endDay=10,
+                     endDay=15,
                      temp_freq='monthly',
                      water_area=True,
                      water_level=False,
@@ -1030,30 +1026,39 @@ def GERD_water_stats(aoi=GERD_aoi,
         SAR_col = S1_SAR_col(aoi, startYear, startMonth,
                              startDay, endYear, endMonth, endDay, temp_freq)
 
-    except Exception as e:
-        print(e)
-        return
-    else:
         if isinstance(SAR_col, list):
             SAR = SAR_col[0]
             dates_sequences = SAR_col[1]
 
-            try:
+    except Exception as e:
+        print(e)
+        return
+    else:
 
+        try:
+            if not water_area and not water_level and not water_volume:
+
+                raise Exception("Check at least one of stats to be calculated")
+
+        except Exception as e:
+
+            print(e)
+            return
+
+        else:
+
+            try:
+                water_stats = {}
+                water_stats['image_date'] = dates_sequences
                 if water_area:
                     water_vectors = SAR.map(filterSpeckles).map(
                         water_classify).map(water_to_vector)
                     water_area = [
                         area / (1e6) for area in water_vectors.aggregate_array('Area').getInfo()]
+                    water_stats['water_surface_area'] = water_area
 
-                    show_plot(x=dates_sequences,
-                              y=water_area,
-                              x_label='Sentinel_1 SAR Image Date',
-                              y_label='Area (km\u00b2)',
-                              legend_label='Water Surface Area'
-                              )
                 if water_level:
-                    if not water_vectors:
+                    if not water_area:
                         water_vectors = SAR.map(filterSpeckles).map(
                             water_classify).map(water_to_vector)
 
@@ -1061,20 +1066,17 @@ def GERD_water_stats(aoi=GERD_aoi,
 
                     max_elev = [elev for elev in dems.aggregate_array(
                         'Maximum_water_elevation').getInfo()]
-                    show_plot(x=dates_sequences,
-                              y=max_elev,
-                              x_label='Sentinel_1 SAR Image Date',
-                              y_label='Water Level (m)',
-                              legend_label='Water Surface level (m) MSL'
-                              )
+                    water_stats['maximum_elevation'] = max_elev
 
                 if water_volume:
 
-                    if not water_vectors:
+                    if not water_area:
                         water_vectors = SAR.map(filterSpeckles).map(
                             water_classify).map(water_to_vector)
-                    if not dems:
+                    if not water_level:
                         dems = water_vectors.map(max_water_ele)
+                        max_elev = [elev for elev in dems.aggregate_array(
+                            'Maximum_water_elevation').getInfo()]
 
                     volume_stats = dems.map(water_vol)
                     ele_sum = volume_stats.aggregate_array(
@@ -1083,15 +1085,9 @@ def GERD_water_stats(aoi=GERD_aoi,
                         'Pixels_number').getInfo()
                     volume = [((water_level*pixles_count-elevations_sum)*900)/(1e9)
                               for water_level, elevations_sum, pixles_count in zip(max_elev, ele_sum, pixel_num)]
+                    water_stats['water_volume'] = volume
 
-                    show_plot(x=dates_sequences,
-                              y=volume,
-                              x_label='Sentinel_1 SAR Image Date',
-                              y_label='Water Volume (bcm)',
-                              legend_label='Water Volume (bcm)'
-                              )
+                return water_stats
 
             except:
                 print('Error! Memory Limit Exceeded')
-
-
