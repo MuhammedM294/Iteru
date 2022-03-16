@@ -2,9 +2,7 @@
 
 __author__ = """Muhammed Abdelaal"""
 __email__ = 'muhammedaabdelaal@gmail.com'
-__version__ = '0.0.5'
+__version__ = '0.0.8'
 
 
 from .iteru import *
-
-
