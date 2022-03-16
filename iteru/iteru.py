@@ -6,19 +6,21 @@ from .common import *
 from .gui_widgets import *
 from ipywidgets import *
 import ipyleaflet
+import geemap
 import ee
 import datetime
 import matplotlib.pyplot as plt
 
 
-class Map(ipyleaflet.Map):
+class Map(geemap.Map):
     """ Inherting the Map class from Ipyleaflet with the all its methods and attributes
 
     """
 
     def __init__(self, **kwargs):
-
+        
         Map.zoom_control = False
+        
         if 'center' not in kwargs:
             kwargs['center'] = [27, 31]
 
@@ -34,7 +36,9 @@ class Map(ipyleaflet.Map):
             self.layout.height = kwargs['height']
 
         super().__init__(**kwargs)
-
+        
+        
+        self.clear_controls()
         self.add_control(ipyleaflet.SearchControl(
 
             position="topleft",
