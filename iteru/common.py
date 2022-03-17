@@ -25,4 +25,4 @@ def ee_initialize(token_name="EARTHENGINE_TOKEN"):
             ee.Initialize()
 
 
-ee_initialize()
+ee_initialize(token_name="EARTHENGINE_TOKEN")

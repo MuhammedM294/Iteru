@@ -1,15 +1,13 @@
 """The main module for the interactive mapping based on Google Earth Enigne Python API and Ipyleaflet Package """
 import ee
+from .common import *
 import datetime
 import geemap
 import ipyleaflet
 import matplotlib.pyplot as plt
-
 from ipywidgets import *
 from .gui_widgets import *
-from .common import *
 from IPython.display import display
-ee.Initialize()
 
 
 class Map(geemap.Map):
