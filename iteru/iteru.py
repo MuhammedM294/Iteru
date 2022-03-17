@@ -462,7 +462,26 @@ def get_dates_sequence(start_date, end_date, time_delta=30):
     return days_dates
 
 
-GERD_aoi = 'aoi'
+GERD_aoi = ee.Geometry.Polygon([[[
+    35.008243,
+    10.522199
+],
+    [
+    35.008243,
+    11.266588
+],
+    [
+    35.387092,
+    11.266588
+],
+    [
+    35.387092,
+    10.522199
+],
+    [
+    35.008243,
+    10.522199
+]]])
 
 
 def addRatioBand(img):
@@ -717,7 +736,12 @@ def water_to_vector(img):
         .copyProperties(lake_feature, lake_feature.propertyNames())
 
 
-elevation_dataset = ''
+elevation_dataset = elevation_dataset = ee.ImageCollection('JAXA/ALOS/AW3D30/V3_2')\
+    .filter(ee.Filter.bounds(GERD_aoi))\
+    .select('DSM')\
+    .median()\
+    .clip(GERD_aoi)\
+    .reproject(crs='EPSG:32636', scale=30)
 
 
 def max_water_ele(feature):
