@@ -9,6 +9,7 @@ from ipywidgets import *
 from .gui_widgets import *
 from .common import *
 from IPython.display import display
+ee.Initialize()
 
 
 class Map(geemap.Map):
@@ -345,6 +346,11 @@ def add_text_to_gif(out_gif, dates_list,
 
     from PIL import Image, ImageDraw, ImageFont, ImageSequence
     import io
+    import pkg_resources
+
+    pkg_dir = os.path.dirname(
+        pkg_resources.resource_filename("geemap", "geemap.py"))
+    default_font = os.path.join(pkg_dir, "data/fonts/arial.ttf")
 
     gif = Image.open(out_gif)
     count = gif.n_frames
@@ -355,10 +361,8 @@ def add_text_to_gif(out_gif, dates_list,
 
     dates_text = dates_list
     copywrite = '©Iteru, 2022'
-    dates_text_font = ImageFont.truetype(
-        "https://github.com/MuhammedM294/common_data/raw/main/Fonts/News_705_Italic_BT.ttf", dates_font_size)
-    copywrite_font = ImageFont.truetype(
-        "https://github.com/MuhammedM294/common_data/raw/main/Fonts/News_705_Italic_BT.ttf", copywrite_font_size)
+    dates_text_font = ImageFont.truetype(default_font, dates_font_size)
+    copywrite_font = ImageFont.truetype(default_font, copywrite_font_size)
 
     frames = []
 
