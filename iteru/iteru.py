@@ -719,12 +719,7 @@ def water_to_vector(img):
         .copyProperties(lake_feature, lake_feature.propertyNames())
 
 
-elevation_dataset = ee.ImageCollection('JAXA/ALOS/AW3D30/V3_2')\
-    .filter(ee.Filter.bounds(GERD_aoi))\
-    .select('DSM')\
-    .median()\
-    .clip(GERD_aoi)\
-    .reproject(crs='EPSG:32636', scale=30)
+elevation_dataset = ''
 
 
 def max_water_ele(feature):
