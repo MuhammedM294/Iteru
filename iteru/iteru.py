@@ -464,26 +464,7 @@ def get_dates_sequence(start_date, end_date, time_delta=30):
     return days_dates
 
 
-GERD_aoi = ee.Geometry.Polygon([[[
-    35.008243,
-    10.522199
-],
-    [
-    35.008243,
-    11.266588
-],
-    [
-    35.387092,
-    11.266588
-],
-    [
-    35.387092,
-    10.522199
-],
-    [
-    35.008243,
-    10.522199
-]]])
+GERD_aoi = 'aoi'
 
 
 def addRatioBand(img):
