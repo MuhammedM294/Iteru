@@ -356,9 +356,9 @@ def add_text_to_gif(out_gif, dates_list,
     dates_text = dates_list
     copywrite = '©Iteru, 2022'
     dates_text_font = ImageFont.truetype(
-        r'C:\Users\muham\Downloads\News 705 Italic BT\News 705 Italic BT.ttf', dates_font_size)
+        "https://github.com/MuhammedM294/common_data/raw/main/Fonts/News_705_Italic_BT.ttf", dates_font_size)
     copywrite_font = ImageFont.truetype(
-        r'C:\Users\muham\Downloads\News 705 Italic BT\News 705 Italic BT.ttf', copywrite_font_size)
+        "https://github.com/MuhammedM294/common_data/raw/main/Fonts/News_705_Italic_BT.ttf", copywrite_font_size)
 
     frames = []
 
