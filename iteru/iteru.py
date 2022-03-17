@@ -1,15 +1,13 @@
 """The main module for the interactive mapping based on Google Earth Enigne Python API and Ipyleaflet Package """
-
 import ee
-ee.Initialize()
-from IPython.display import display
-from .common import *
-from .gui_widgets import *
-from ipywidgets import *
-import ipyleaflet
-import geemap
-import datetime
 import matplotlib.pyplot as plt
+import datetime
+import geemap
+import ipyleaflet
+from ipywidgets import *
+from .gui_widgets import *
+from .common import *
+from IPython.display import display
 
 
 class Map(geemap.Map):
@@ -18,9 +16,9 @@ class Map(geemap.Map):
     """
 
     def __init__(self, **kwargs):
-        
+
         Map.zoom_control = False
-        
+
         if 'center' not in kwargs:
             kwargs['center'] = [27, 31]
 
@@ -36,8 +34,7 @@ class Map(geemap.Map):
             self.layout.height = kwargs['height']
 
         super().__init__(**kwargs)
-        
-        
+
         self.clear_controls()
         self.add_control(ipyleaflet.SearchControl(
 
@@ -53,7 +50,7 @@ class Map(geemap.Map):
 
         self.add_control(ipyleaflet.ScaleControl(position='bottomleft'))
 
-        self.add_control(ipyleaflet.LayersControl(position='topleft'))
+        # self.add_control(ipyleaflet.LayersControl(position='topleft'))
 
         self.add_control(ipyleaflet.ZoomControl(position='topright'))
 
@@ -356,7 +353,7 @@ def add_text_to_gif(out_gif, dates_list,
     copywrite_xy = (int(0.001 * width), int(0.98 * height))
 
     dates_text = dates_list
-    copywrite = '©Muhammed Abdelaal, 2022'
+    copywrite = '©Iteru, 2022'
     dates_text_font = ImageFont.truetype(
         r'C:\Users\muham\Downloads\News 705 Italic BT\News 705 Italic BT.ttf', dates_font_size)
     copywrite_font = ImageFont.truetype(
