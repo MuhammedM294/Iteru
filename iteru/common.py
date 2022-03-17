@@ -4,6 +4,8 @@
 import os
 import ee
 
+from geemap import ee_initialize
+
 
 def ee_initialize(token_name="EARTHENGINE_TOKEN"):
     """Authenticates Earth Engine and initialize an Earth Engine session"""
@@ -11,7 +13,8 @@ def ee_initialize(token_name="EARTHENGINE_TOKEN"):
         try:
             ee_token = os.environ.get(token_name)
             if ee_token is not None:
-                credential_file_path = os.path.expanduser("~/.config/earthengine/")
+                credential_file_path = os.path.expanduser(
+                    "~/.config/earthengine/")
                 if not os.path.exists(credential_file_path):
                     credential = '{"refresh_token":"%s"}' % ee_token
                     os.makedirs(credential_file_path, exist_ok=True)
@@ -22,4 +25,3 @@ def ee_initialize(token_name="EARTHENGINE_TOKEN"):
         except Exception:
             ee.Authenticate()
             ee.Initialize()
-
