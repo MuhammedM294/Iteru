@@ -4,11 +4,7 @@
 import os
 import ee
 
-from geemap import ee_initialize
 
-ee_initialize(token_name="EARTHENGINE_TOKEN")
-
-'''            
 def ee_initialize(token_name="EARTHENGINE_TOKEN"):
     """Authenticates Earth Engine and initialize an Earth Engine session"""
     if ee.data._credentials is None:
@@ -27,4 +23,6 @@ def ee_initialize(token_name="EARTHENGINE_TOKEN"):
         except Exception:
             ee.Authenticate()
             ee.Initialize()
-'''
+
+
+ee_initialize()
