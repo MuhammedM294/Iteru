@@ -10,8 +10,6 @@ from .gui_widgets import *
 from .common import *
 from IPython.display import display
 
-ee.Initialize()
-
 
 class Map(geemap.Map):
     """ Inherting the Map class from geemap with the all its methods and attributes
@@ -462,26 +460,7 @@ def get_dates_sequence(start_date, end_date, time_delta=30):
     return days_dates
 
 
-GERD_aoi = ee.Geometry.Polygon([[[
-    35.008243,
-    10.522199
-],
-    [
-    35.008243,
-    11.266588
-],
-    [
-    35.387092,
-    11.266588
-],
-    [
-    35.387092,
-    10.522199
-],
-    [
-    35.008243,
-    10.522199
-]]])
+GERD_aoi = None
 
 
 def addRatioBand(img):
