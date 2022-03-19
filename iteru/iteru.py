@@ -384,6 +384,7 @@ def add_text_to_gif(out_gif, dates_list,
         loop=0,
         optimize=True,
     )
+    return out_gif
 
 
 def display_gif(out_gif):
@@ -977,14 +978,14 @@ def GERD_SAR_timelaspe(aoi=GERD_aoi,
 
                     out_gif = get_gif(url)
 
-                    add_text_to_gif(out_gif, dates_sequences,
-                                    dates_font_size,
-                                    copywrite_font_size,
-                                    dates_font_color,
-                                    copywrite_font_color,
-                                    framesPerSecond)
+                    out_gif = add_text_to_gif(out_gif, dates_sequences,
+                                              dates_font_size,
+                                              copywrite_font_size,
+                                              dates_font_color,
+                                              copywrite_font_color,
+                                              framesPerSecond)
 
-                    display_gif(out_gif)
+                    return out_gif
 
 
 def show_plot(x, y,
