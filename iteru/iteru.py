@@ -310,16 +310,29 @@ def get_imgCol_dates(col):
     return col.aggregate_array('DATE').getInfo()
 
 
+def temp_file_path(extension):
+
+    import tempfile
+    import uuid
+
+    if not extension.startswith("."):
+        extension = "." + extension
+    file_id = str(uuid.uuid4())
+    file_path = os.path.join(tempfile.gettempdir(), f"{file_id}{extension}")
+
+    return file_path
+
+
 def get_gif(url):
 
     import requests
     import os
 
     r = requests.get(url, stream=True)
-    out_dir = os.path.join(os.path.expanduser("~"), "Downloads")
+    '''   out_dir = os.path.join(os.path.expanduser("~"), "Downloads")
     filename = "TimeSeries_" + random_string() + ".gif"
-    out_gif = os.path.join(out_dir, filename)
-
+    out_gif = os.path.join(out_dir, filename)  '''
+    out_gif = temp_file_path('.gif')
     with open(out_gif, 'wb') as file:
         for chunk in r.iter_content(chunk_size=1024):
             file.write(chunk)
@@ -939,9 +952,9 @@ def GERD_SAR_timelaspe(aoi=GERD_aoi,
                        startYear=2020,
                        startMonth=6,
                        startDay=1,
-                       endYear=2020,
-                       endMonth=6,
-                       endDay=10,
+                       endYear=2022,
+                       endMonth=3,
+                       endDay=19,
                        temp_freq=None,
                        vis_method='rgb',
                        crs='EPSG:3857',
