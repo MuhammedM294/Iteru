@@ -310,29 +310,14 @@ def get_imgCol_dates(col):
     return col.aggregate_array('DATE').getInfo()
 
 
-def temp_file_path(extension):
-
-    import tempfile
-    import uuid
-
-    if not extension.startswith("."):
-        extension = "." + extension
-    file_id = str(uuid.uuid4())
-    file_path = os.path.join(tempfile.gettempdir(), f"{file_id}{extension}")
-
-    return file_path
-
-
 def get_gif(url):
 
     import requests
     import os
-
+    import tempfile
     r = requests.get(url, stream=True)
-    '''   out_dir = os.path.join(os.path.expanduser("~"), "Downloads")
     filename = "TimeSeries_" + random_string() + ".gif"
-    out_gif = os.path.join(out_dir, filename)  '''
-    out_gif = temp_file_path('.gif')
+    out_gif = os.path.join(tempfile.gettempdir(), filename)
     with open(out_gif, 'wb') as file:
         for chunk in r.iter_content(chunk_size=1024):
             file.write(chunk)
@@ -666,10 +651,21 @@ def SAR_timeseries_url(col, aoi, vis_method='rgb', frame_per_second=2, crs='EPSG
 
         elif vis_method == 'single_band_VV':
             bands = ['VV']
+            palette = ['#000000', '#FFFFFF']
+
+        elif vis_method == 'single_band_VV_R':
+            bands = ['VV']
+            palette = ['#FFFFFF', '#000000']
 
         elif vis_method == 'single_band_VH':
 
             bands = ['VH']
+            palette = ['#000000', '#FFFFFF']
+
+        elif vis_method == 'single_band_VH_R':
+
+            bands = ['VH']
+            palette = ['#FFFFFF', '#000000']
 
         elif vis_method == 'water_mask_only':
 
