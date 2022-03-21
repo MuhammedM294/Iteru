@@ -4,7 +4,7 @@
 [![image](https://img.shields.io/pypi/v/iteru.svg)](https://pypi.python.org/pypi/iteru)
 
 
-**Python package for a web app**
+**A Python Package for A Google Earth Engine-Based Interactive Web Application**
 
 
 -   Free software: MIT license
@@ -13,7 +13,7 @@
 
 ## Features
 
--   TODO
+-   Continuously Monitoring The [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) Reservoir Waterbody.
 
 ## Credits
 
