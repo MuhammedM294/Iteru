@@ -51,8 +51,6 @@ GERD_aoi = ee.Geometry.Polygon([[[
 ]]])
 
 
-water_threshold = -25
-
 elevation_dataset = ee.ImageCollection('JAXA/ALOS/AW3D30/V3_2')\
     .filter(ee.Filter.bounds(GERD_aoi))\
     .select('DSM')\
