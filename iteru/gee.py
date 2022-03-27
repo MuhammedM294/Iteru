@@ -8,21 +8,6 @@ import datetime
 from .common import *
 
 
-def add_ee_layer(self, ee_object, vis_params=None, name=''):
-
-    map_id_dict = ee_object.getMapId(vis_params)
-
-    ee_object_tile = ipyleaflet.TileLayer(
-
-        url=map_id_dict['tile_fetcher'].url_format,
-        attr='Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
-        name=name,
-        overlay=True,
-        control=True
-    )
-    self.add_layer(ee_object_tile)
-
-
 def ee_tilelayer(ee_object, vis_params=None, name=''):
 
     ee_object_id = ee_object.getMapId(vis_params)
@@ -36,19 +21,6 @@ def ee_tilelayer(ee_object, vis_params=None, name=''):
         control=True
     )
     return ee_object_tile
-
-
-def zoom_to(self, ee_object, zoom=8):
-
-    try:
-        lat = ee_object.geometry().centroid().getInfo()['coordinates'][1]
-        long = ee_object.geometry().centroid().getInfo()['coordinates'][0]
-        self.center = (lat, long)
-        self.zoom = zoom
-    except:
-        self.center = (27, 31)
-        self.zoom = 5
-        print('Error: can not get the centroid of the Object')
 
 
 def get_vis_params(collection):
@@ -74,6 +46,14 @@ def add_dates_to_imgcol(img):
 def get_imgCol_dates(col):
     col = col.map(add_dates_to_imgcol)
     return col.aggregate_array('DATE').getInfo()
+
+
+def get_imgCol_dates_dict(col):
+
+    dates_dict = {formated_date: date for formated_date, date in zip(
+        get_imgCol_dates(col), col.aggregate_array('system:time_start').getInfo())}
+
+    return dates_dict
 
 
 def dates_params(startYear=2020, startMonth=6, startDay=1, endYear=2022, endMonth=3, endDay=1):
@@ -385,7 +365,7 @@ def calc_area(feature):
 
 def water_to_vector(img):
 
-    water_mask = img.select('Water_mask').clip(GERD_aoi)
+    water_mask = img.select('water_mask').clip(GERD_aoi)
 
     feature = ee.Image(1).updateMask(water_mask).reduceToVectors(
         geometry=water_mask.geometry(),

@@ -50,6 +50,42 @@ GERD_aoi = ee.Geometry.Polygon([[[
     10.522199
 ]]])
 
+GERD_aoi_dam = ee.Geometry.Polygon(
+    [
+        [
+            [
+                35.089645,
+                11.208124
+            ],
+            [
+                35.008278,
+                11.207198
+            ],
+            [
+                35.007935,
+                10.521569
+            ],
+            [
+                35.387306,
+                10.522244
+            ],
+            [
+                35.386963,
+                11.265959
+            ],
+            [
+                35.11857,
+                11.26638
+            ],
+            [
+                35.089645,
+                11.208124
+            ]
+        ]
+    ]
+
+)
+
 
 elevation_dataset = ee.ImageCollection('JAXA/ALOS/AW3D30/V3_2')\
     .filter(ee.Filter.bounds(GERD_aoi))\

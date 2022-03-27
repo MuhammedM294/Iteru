@@ -241,7 +241,34 @@ class Map(ipyleaflet.Map):
             close_button.on_click(remove_layer)
 
         except Exception:
-            print('layer already on the map')
+            pass
+            #print('layer already on the map')
+
+    def zoom_to(self, ee_object, zoom=8):
+
+        try:
+            lat = ee_object.geometry().centroid().getInfo()['coordinates'][1]
+            long = ee_object.geometry().centroid().getInfo()['coordinates'][0]
+            self.center = (lat, long)
+            self.zoom = zoom
+        except:
+            self.center = (27, 31)
+            self.zoom = 5
+            print('Error: can not get the centroid of the Object')
+
+    def add_ee_layer(self, ee_object, vis_params=None, name=''):
+
+        map_id_dict = ee_object.getMapId(vis_params)
+
+        ee_object_tile = ipyleaflet.TileLayer(
+
+            url=map_id_dict['tile_fetcher'].url_format,
+            attr='Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
+            name=name,
+            overlay=True,
+            control=True
+        )
+        self.add_layer(ee_object_tile)
 
 
 TOC = ipywidgets.ToggleButton(
