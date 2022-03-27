@@ -50,7 +50,7 @@ class Map(ipyleaflet.Map):
 
         self.add_control(ipyleaflet.ScaleControl(position='bottomleft'))
 
-        # self.add_control(ipyleaflet.LayersControl(position='topleft'))
+        self.add_control(ipyleaflet.LayersControl(position='topleft'))
 
         self.add_control(ipyleaflet.ZoomControl(position='topright'))
 

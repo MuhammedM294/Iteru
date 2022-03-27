@@ -153,11 +153,17 @@ def filterSpeckles(img):
     return img.addBands(VH_smooth)
 
 
-def water_classify(img):
-    vv = img.select('VH_Filtered')
-    water = vv.lt(water_threshold).rename('Water')
-    water_mask = water.updateMask(water).rename('Water_mask')
-    return img.addBands([water_mask])
+def water_classify_threshold(col, threshold):
+
+    def water_classify(img):
+
+        VH_Filtered = img.select('VH_Filtered')
+        water = VH_Filtered.lt(threshold).rename('Water')
+        water_mask = water.updateMask(water).rename('water_mask')
+
+        return img.addBands([water, water_mask])
+
+    return col.map(water_classify)
 
 
 def rgb_water_mosaic(img):
@@ -271,7 +277,7 @@ def S1_SAR_col(aoi, startYear, startMonth, startDay, endYear, endMonth, endDay, 
                             return [SAR, dates_sequence]
 
 
-def SAR_timeseries_url(col, aoi, vis_method='rgb', frame_per_second=2, crs='EPSG:3857', dimensions=900):
+def SAR_timeseries_url(col, aoi, vis_method='rgb', water_threshold=-25, frame_per_second=2, crs='EPSG:3857', dimensions=900):
 
     try:
         if isinstance(col, ee.ImageCollection):
@@ -322,14 +328,16 @@ def SAR_timeseries_url(col, aoi, vis_method='rgb', frame_per_second=2, crs='EPSG
 
         elif vis_method == 'water_mask_only':
 
-            col = col.map(filterSpeckles).map(water_classify)
+            col = col.map(filterSpeckles)
+            col = water_classify_threshold(col, water_threshold)
             bands = ['Water_mask']
             palette = ['00FFFF', '0000FF']
 
         elif vis_method == 'rgb_water_mosaic':
 
-            col = col.map(filterSpeckles).map(
-                water_classify).map(rgb_water_mosaic)
+            col = col.map(filterSpeckles)
+            col = water_classify_threshold(col, water_threshold)
+            col = col.map(rgb_water_mosaic)
 
             bands = ['vis-red', 'vis-green', 'vis-blue']
             vis_min = 0
@@ -598,6 +606,7 @@ def GERD_SAR_timelaspe(aoi=GERD_aoi,
                        endDay=19,
                        temp_freq=None,
                        vis_method='rgb',
+                       water_threshold=-25,
                        crs='EPSG:3857',
                        dimensions=900,
                        dates_font_size=25,
@@ -621,7 +630,7 @@ def GERD_SAR_timelaspe(aoi=GERD_aoi,
             try:
 
                 url = SAR_timeseries_url(
-                    SAR, aoi, vis_method, framesPerSecond, crs, dimensions)
+                    SAR, aoi, vis_method, water_threshold, framesPerSecond, crs, dimensions)
 
             except Exception as e:
                 print(e)
@@ -650,6 +659,7 @@ def GERD_water_stats(aoi=GERD_aoi,
                      endMonth=3,
                      endDay=15,
                      temp_freq='monthly',
+                     water_threshold=-25,
                      water_area=True,
                      water_level=False,
                      water_volume=False,
@@ -684,16 +694,20 @@ def GERD_water_stats(aoi=GERD_aoi,
                 water_stats = {}
                 water_stats['image_date'] = dates_sequences
                 if water_area:
-                    water_vectors = SAR.map(filterSpeckles).map(
-                        water_classify).map(water_to_vector)
+                    SAR = SAR.map(filterSpeckles)
+                    SAR = water_classify_threshold(SAR, water_threshold)
+                    water_vectors = SAR.map(water_to_vector)
+                    
                     water_area = [
                         area / (1e6) for area in water_vectors.aggregate_array('Area').getInfo()]
                     water_stats['water_surface_area'] = water_area
 
                 if water_level:
                     if not water_area:
-                        water_vectors = SAR.map(filterSpeckles).map(
-                            water_classify).map(water_to_vector)
+                        
+                         SAR = SAR.map(filterSpeckles)
+                         SAR = water_classify_threshold(SAR, water_threshold)
+                         water_vectors = SAR.map(water_to_vector)
 
                     dems = water_vectors.map(max_water_ele)
 
@@ -704,8 +718,9 @@ def GERD_water_stats(aoi=GERD_aoi,
                 if water_volume:
 
                     if not water_area:
-                        water_vectors = SAR.map(filterSpeckles).map(
-                            water_classify).map(water_to_vector)
+                         SAR = SAR.map(filterSpeckles)
+                         SAR = water_classify_threshold(SAR, water_threshold)
+                         water_vectors = SAR.map(water_to_vector)
                     if not water_level:
                         dems = water_vectors.map(max_water_ele)
                         max_elev = [elev for elev in dems.aggregate_array(
