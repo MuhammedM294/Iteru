@@ -2,12 +2,12 @@
 
 import ipywidgets
 import ee
-from .common import *
-from gee import *
 import ipyleaflet
 from ipywidgets import *
 from IPython.display import display
 from ipyleaflet import WidgetControl
+from .gee import *
+from .common import*
 
 
 class Map(ipyleaflet.Map):

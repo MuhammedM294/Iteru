@@ -6,5 +6,3 @@ __version__ = '0.0.22'
 
 
 from .map import *
-from .gee import *
-from .common import*
