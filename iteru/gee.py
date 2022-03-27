@@ -1,4 +1,4 @@
-""" The Main Module for Google Earth Engine Python API Functions """
+""" A Main Module for Google Earth Engine Python API Functions """
 
 import ee
 from ipywidgets import *
