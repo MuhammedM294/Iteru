@@ -1,273 +1,26 @@
-"""The main module for the interactive mapping based on Google Earth Enigne Python API and Ipyleaflet Package """
+""" The Main Module for Google Earth Engine Python API Functions """
+
 import ee
-from .common import *
-import datetime
-import geemap
-import ipyleaflet
-import matplotlib.pyplot as plt
 from ipywidgets import *
-from .gui_widgets import *
+import ipyleaflet
 from IPython.display import display
+import datetime
+from .common import *
 
 
-class Map(geemap.Map):
-    """ Inherting the Map class from geemap with the all its methods and attributes
+def add_ee_layer(self, ee_object, vis_params=None, name=''):
 
-    """
+    map_id_dict = ee_object.getMapId(vis_params)
 
-    def __init__(self, **kwargs):
+    ee_object_tile = ipyleaflet.TileLayer(
 
-        Map.zoom_control = False
-
-        if 'center' not in kwargs:
-            kwargs['center'] = [27, 31]
-
-        if 'zoom' not in kwargs:
-            kwargs['zoom'] = 5
-
-        if 'scroll_wheel_zoom' not in kwargs:
-            kwargs['scroll_wheel_zoom'] = True
-
-        if 'height' not in kwargs:
-            self.layout.height = '500px'
-        else:
-            self.layout.height = kwargs['height']
-
-        super().__init__(**kwargs)
-
-        self.clear_controls()
-        self.add_control(ipyleaflet.SearchControl(
-
-            position="topleft",
-            url='https://nominatim.openstreetmap.org/search?format=json&q={s}',
-            zoom=10,
-            marker=ipyleaflet.Marker(
-                icon=ipyleaflet.AwesomeIcon(name="check",
-                                            marker_color='green', icon_color='darkgreen')
-            )
-        )
-        )
-
-        self.add_control(ipyleaflet.ScaleControl(position='bottomleft'))
-
-        # self.add_control(ipyleaflet.LayersControl(position='topleft'))
-
-        self.add_control(ipyleaflet.ZoomControl(position='topright'))
-
-        self.add_control(ipyleaflet.FullScreenControl(position='topright'))
-
-        draw_control = ipyleaflet.DrawControl(position='topright')
-
-        draw_control.polyline = {
-            "shapeOptions": {
-                "color": "blue",
-                "weight": 8,
-                "opacity": 0.5
-            }
-        }
-        draw_control.polygon = {
-            "shapeOptions": {
-                "fillColor": "blue",
-                "color": "red",
-                "fillOpacity": 0.1
-            },
-            "drawError": {
-                "color": "#dd253b",
-                "message": "Oups!"
-            },
-            "allowIntersection": False
-        }
-        draw_control.circle = {
-            "shapeOptions": {
-                "fillColor": "blue",
-                "color": "red",
-                "fillOpacity": 0.1
-            }
-        }
-        draw_control.rectangle = {
-            "shapeOptions": {
-                "fillColor": "blue",
-                "color": "red",
-                "fillOpacity": 0.1
-            }
-        }
-
-        self.add_control(draw_control)
-        self.draw_control = draw_control
-        self.last_draw = draw_control.last_draw
-        self.last_action = draw_control.last_action
-
-        def handle_draw(target, action, geo_json):
-            self.last_draw = geo_json
-            self.last_action = action
-            if self.last_draw['geometry']['type'] == 'Polygon':
-                self.aoi = ee.Geometry.Polygon(
-                    self.last_draw['geometry']['coordinates'])
-            elif self.last_draw['geometry']['type'] == 'Point':
-                self.aoi = ee.Geometry.Point(
-                    self.last_draw['geometry']['coordinates'])
-            elif self.last_draw['geometry']['type'] == 'LineString':
-                self.aoi = ee.Geometry.LineString(
-                    self.last_draw['geometry']['coordinates'])
-
-        self.draw_control.on_draw(handle_draw)
-
-        measure = ipyleaflet.MeasureControl(
-            position='topright',
-            active_color='orange',
-            primary_length_unit='kilometers',
-            secondary_length_unit=('miles'),
-            secondary_area_unit=('acres')
-        )
-
-        measure.add_area_unit('Sq Kilometers', 1e-6, 4)
-        measure.primary_area_unit = ('Sq Kilometers')
-        self.add_control(measure)
-
-        self.add_control(TOC_widget)
-
-        def add_to_map(change):
-            if change.new:
-                self.add_layer_widgets(change.new)
-
-        # add coordinates of the mousemove to the map
-        def from_decimal_to_degree(angle):
-            degrees = int(angle)
-            minutes = (angle - degrees)*60
-            seconds = (minutes - int(minutes)) * 60
-            return f"{degrees}°{int(minutes)}'{seconds:.4f}”"
-
-        coordinates = HTML()
-
-        def handle_interaction(**kwargs):
-            if kwargs.get('type') == 'mousemove':
-                coordinates.value = f"""
-                                    <b>Lat</b>: {from_decimal_to_degree(float(str(kwargs.get('coordinates')[0])))}
-                                    <br>
-                                    <b>Long</b>: {from_decimal_to_degree(float(str(kwargs.get('coordinates')[1])))}
-                                    <br>
-                                    <b>Zoom Level</b>: {int(self.zoom)}
-                                    """
-            if kwargs.get('type') == 'click':
-                JAXA = ee.ImageCollection(
-                    'JAXA/ALOS/AW3D30/V3_2').select('DSM').median()
-                lat = float(str(kwargs.get('coordinates')[0]))
-                long = float(str(kwargs.get('coordinates')[1]))
-                point_elevation = JAXA.reduceRegion(
-                    reducer=ee.Reducer.mean(),
-                    geometry=ee.Geometry.Point(long, lat),
-                    scale=10,).getInfo()
-                coordinates.value = f"""
-                                    <b>Lat</b>: {from_decimal_to_degree(float(str(kwargs.get('coordinates')[0])))}
-                                    <br>
-                                    <b>Long</b>: {from_decimal_to_degree(float(str(kwargs.get('coordinates')[1])))}
-                                    <br>
-                                    <b>Zoom Level</b>: {int(self.zoom)}
-                                    <br>
-                                    <b>Elevation</b>:{point_elevation['DSM']}
-                                    """
-
-        self.on_interaction(handle_interaction)
-        coordinates_widget = WidgetControl(
-            widget=coordinates, position='bottomleft')
-        self.add_control(coordinates_widget)
-
-    def add_layer_widgets(self, object, vis_params=None, name=None):
-        try:
-            if isinstance(object, (ee.Image, ee.ImageCollection, ee.FeatureCollection)):
-                layer = ee_tilelayer(object, vis_params)
-                if name is None:
-                    name = object.getInfo()['id']
-
-            elif isinstance(object, ipyleaflet.TileLayer):
-                layer = object
-                if name is None:
-                    name = object.name
-        except:
-            print('input layer is not supported ')
-
-        try:
-            self.add_layer(layer)
-
-            close_button = Button(
-                value=False,
-                tooltip='Remove This Layer',
-                icon='window-close',
-                layout=Layout(width='32px', height='28px'),
-            )
-
-            layer_visibility = Checkbox(
-                value=True,
-                indent=False,
-                layout=Layout(width='15px')
-            )
-
-            layer_name = Label(
-                value=name,
-                layout=Layout(width='150px', height='28px'),
-                tooltip=name
-            )
-            opacity = FloatSlider(
-                value=1,
-                min=0,
-                max=1,
-                step=0.1,
-                indent=False,
-            )
-
-            def change_layer_visibility(show_hide):
-                layer.visible = show_hide
-
-            def change_layer_opacity(Opacity):
-                layer.opacity = Opacity
-
-            def remove_layer(b):
-                self.remove_layer(layer)
-                close_button.close()
-                opacity.close()
-                layer_name.close()
-                layer_visibility.close()
-
-            opacity_slider = interactive(change_layer_opacity, Opacity=opacity)
-
-            visibility_checkbox = interactive(
-                change_layer_visibility, show_hide=layer_visibility)
-
-            with TOC_out:
-                display(
-                    HBox([layer_visibility, layer_name, opacity, close_button]))
-
-            close_button.on_click(remove_layer)
-
-        except Exception:
-            pass
-            #print(f'layer already on the map: {layer}')
-
-    def zoom_to(self, ee_object, zoom=8):
-
-        try:
-            lat = ee_object.geometry().centroid().getInfo()['coordinates'][1]
-            long = ee_object.geometry().centroid().getInfo()['coordinates'][0]
-            self.center = (lat, long)
-            self.zoom = zoom
-        except:
-            self.center = (27, 31)
-            self.zoom = 5
-            print('Error: can not get the centroid of the Object')
-
-    def add_ee_layer(self, ee_object, vis_params=None, name=''):
-
-        map_id_dict = ee_object.getMapId(vis_params)
-
-        ee_object_tile = ipyleaflet.TileLayer(
-
-            url=map_id_dict['tile_fetcher'].url_format,
-            attr='Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
-            name=name,
-            overlay=True,
-            control=True
-        )
-        self.add_layer(ee_object_tile)
+        url=map_id_dict['tile_fetcher'].url_format,
+        attr='Map Data &copy; <a href="https://earthengine.google.com/">Google Earth Engine</a>',
+        name=name,
+        overlay=True,
+        control=True
+    )
+    self.add_layer(ee_object_tile)
 
 
 def ee_tilelayer(ee_object, vis_params=None, name=''):
@@ -283,6 +36,19 @@ def ee_tilelayer(ee_object, vis_params=None, name=''):
         control=True
     )
     return ee_object_tile
+
+
+def zoom_to(self, ee_object, zoom=8):
+
+    try:
+        lat = ee_object.geometry().centroid().getInfo()['coordinates'][1]
+        long = ee_object.geometry().centroid().getInfo()['coordinates'][0]
+        self.center = (lat, long)
+        self.zoom = zoom
+    except:
+        self.center = (27, 31)
+        self.zoom = 5
+        print('Error: can not get the centroid of the Object')
 
 
 def get_vis_params(collection):
@@ -308,94 +74,6 @@ def add_dates_to_imgcol(img):
 def get_imgCol_dates(col):
     col = col.map(add_dates_to_imgcol)
     return col.aggregate_array('DATE').getInfo()
-
-
-def get_gif(url):
-
-    import requests
-    import os
-    import tempfile
-    r = requests.get(url, stream=True)
-    filename = "TimeSeries_" + random_string() + ".gif"
-    out_gif = os.path.join(tempfile.gettempdir(), filename)
-    with open(out_gif, 'wb') as file:
-        for chunk in r.iter_content(chunk_size=1024):
-            file.write(chunk)
-
-    return out_gif
-
-
-def random_string(string_length=4):
-    import random
-    import string
-
-    letters = string.ascii_uppercase
-    return "".join(random.choice(letters) for i in range(string_length))
-
-
-def add_text_to_gif(out_gif, dates_list,
-                    dates_font_size=25,
-                    copywrite_font_size=15,
-                    dates_font_color='red',
-                    copywrite_font_color='black',
-                    framesPerSecond=4):
-
-    from PIL import Image, ImageDraw, ImageFont, ImageSequence
-    import io
-    import pkg_resources
-
-    pkg_dir = os.path.dirname(
-        pkg_resources.resource_filename("geemap", "geemap.py"))
-    default_font = os.path.join(pkg_dir, "data/fonts/arial.ttf")
-
-    gif = Image.open(out_gif)
-    count = gif.n_frames
-
-    width, height = gif.size
-    dates_text_xy = (int(0.001 * width), int(0.001 * height))
-    copywrite_xy = (int(0.001 * width), int(0.98 * height))
-
-    dates_text = dates_list
-    copywrite = '©Iteru, 2022'
-    dates_text_font = ImageFont.truetype(default_font, dates_font_size)
-    copywrite_font = ImageFont.truetype(default_font, copywrite_font_size)
-
-    frames = []
-
-    for index, frame in enumerate(ImageSequence.Iterator(gif)):
-        frame = frame.convert("RGB")
-        draw = ImageDraw.Draw(frame)
-        draw.text(dates_text_xy, dates_text[index],
-                  fill=dates_font_color, font=dates_text_font)
-        draw.text(copywrite_xy, copywrite,
-                  fill=copywrite_font_color, font=copywrite_font)
-        b = io.BytesIO()
-        frame.save(b, format="GIF")
-        frame = Image.open(b)
-        frames.append(frame)
-
-    frames[0].save(
-        out_gif,
-        save_all=True,
-        append_images=frames[1:],
-        duration=int(1000/framesPerSecond),
-        loop=0,
-        optimize=True,
-    )
-    return out_gif
-
-
-def display_gif(out_gif):
-
-    from ipywidgets import Image
-
-    out = Output()
-    out.clear_output(wait=True)
-    display(out)
-    with out:
-        with open(out_gif, 'rb') as file:
-            image = file.read()
-        display(Image(value=image))
 
 
 def dates_params(startYear=2020, startMonth=6, startDay=1, endYear=2022, endMonth=3, endDay=1):
@@ -461,28 +139,6 @@ def get_dates_sequence(start_date, end_date, time_delta=30):
     return days_dates
 
 
-GERD_aoi = ee.Geometry.Polygon([[[
-    35.008243,
-    10.522199
-],
-    [
-    35.008243,
-    11.266588
-],
-    [
-    35.387092,
-    11.266588
-],
-    [
-    35.387092,
-    10.522199
-],
-    [
-    35.008243,
-    10.522199
-]]])
-
-
 def addRatioBand(img):
     ratio_band = img.select('VV').divide(img.select('VH')).rename('VV/VH')
 
@@ -495,9 +151,6 @@ def filterSpeckles(img):
         100, 'circle', 'meters').rename('VH_Filtered')
 
     return img.addBands(VH_smooth)
-
-
-water_threshold = -25
 
 
 def water_classify(img):
@@ -746,14 +399,6 @@ def water_to_vector(img):
         .copyProperties(lake_feature, lake_feature.propertyNames())
 
 
-elevation_dataset = elevation_dataset = ee.ImageCollection('JAXA/ALOS/AW3D30/V3_2')\
-    .filter(ee.Filter.bounds(GERD_aoi))\
-    .select('DSM')\
-    .median()\
-    .clip(GERD_aoi)\
-    .reproject(crs='EPSG:32636', scale=30)
-
-
 def max_water_ele(feature):
 
     lake_dem = elevation_dataset.clip(feature)
@@ -995,32 +640,6 @@ def GERD_SAR_timelaspe(aoi=GERD_aoi,
                                               framesPerSecond)
 
                     return out_gif
-
-
-def show_plot(x, y,
-              x_label, y_label,
-              xlabel_fontsize=15,
-              ylabel_fontsize=18,
-              xticks_rotation=90,
-              figwitdth=10,
-              figheight=7,
-              style='fivethirtyeight',
-              grid_status=True,
-              legend_label=None
-              ):
-
-    import matplotlib.pyplot as plt
-    plt.style.use(style)
-    f = plt.figure()
-    f.set_figwidth(figwitdth)
-    f.set_figheight(figheight)
-    plt.xlabel(x_label, fontsize=xlabel_fontsize)
-    plt.ylabel(y_label, fontsize=ylabel_fontsize)
-    plt.grid(grid_status)
-    plt.xticks(rotation=xticks_rotation)
-    plt.plot(x, y, label=legend_label)
-    plt.legend()
-    plt.gcf().set_size_inches(18.5, 10.5)
 
 
 def GERD_water_stats(aoi=GERD_aoi,
