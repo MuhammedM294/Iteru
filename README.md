@@ -8,7 +8,6 @@
 
 
 -   Free software: MIT license
--   Documentation: https://MuhammedM294.github.io/iteru
     
 
 ## Features
