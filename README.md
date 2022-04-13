@@ -4,16 +4,20 @@
 [![image](https://img.shields.io/pypi/v/iteru.svg)](https://pypi.python.org/pypi/iteru)
 
 
-**A Python Package for A Google Earth Engine-Based Interactive Web Application**
+**A Python package for interactive mapping with Google Earth Engine, ipyleaflet, and ipywidgets.**
 
 
 -   Free software: MIT license
--   Documentation: https://MuhammedM294.github.io/iteru
     
 
 ## Features
 
--   Continuously Monitoring The [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) Reservoir Waterbody.
+
+-   Display Earth Engine data layers for interactive mapping.
+-   Create Sentinel-1 timelaspe animations of the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) reservoir waterbody.
+-   Map the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) reservoir surface water extent.
+-   Calculate the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) reservoir surface water level. 
+-   Compute the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) reservoir waterbody volume.
 
 ## Credits
 
