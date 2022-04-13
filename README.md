@@ -4,7 +4,7 @@
 [![image](https://img.shields.io/pypi/v/iteru.svg)](https://pypi.python.org/pypi/iteru)
 
 
-**A Python Package for A Google Earth Engine-Based Interactive Web Application**
+**A Python package for interactive mapping with Google Earth Engine, ipyleaflet, and ipywidgets.**
 
 
 -   Free software: MIT license
