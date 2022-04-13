@@ -13,7 +13,11 @@
 
 ## Features
 
--   Continuously Monitoring The [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) Reservoir Waterbody.
+
+-   Display Earth Engine data layers for interactive mapping.
+-   Create Sentinel-1 timelaspe animations of the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) reservoir Waterbody.
+-   Map the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) reservoir surface water extent.
+-   Calculate the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) reservoir surface water level and waterbody volume variation
 
 ## Credits
 
