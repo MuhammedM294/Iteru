@@ -5,7 +5,7 @@
 
 import unittest
 
-from iteru import iteru
+from iteru import iterugee
 
 
 class TestIteru(unittest.TestCase):

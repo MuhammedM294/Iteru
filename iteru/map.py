@@ -6,8 +6,8 @@ import ipyleaflet
 from ipywidgets import *
 from IPython.display import display
 from ipyleaflet import WidgetControl
-from .gee import *
-from .common import*
+from .iterugee import *
+from .common import *
 
 
 class Map(ipyleaflet.Map):
