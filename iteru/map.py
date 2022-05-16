@@ -8,9 +8,10 @@ from IPython.display import display
 from ipyleaflet import WidgetControl
 from .iterugee import *
 from .common import *
+import geemap
 
 
-class Map(ipyleaflet.Map):
+class Map(geemap.Map):
     """
     Inherting the Map class from ipyleaflet with the all its methods and attributes
     """
