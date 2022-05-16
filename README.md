@@ -4,7 +4,7 @@
 [![image](https://img.shields.io/pypi/v/iteru.svg)](https://pypi.python.org/pypi/iteru)
 
 
-**Google Earth Engine-Based Interactive Web Application for Continuously Monitoring the GERD Reservoir in Ethiopia**
+**A Google Earth Engine-Based Interactive Web Application for Continuously Monitoring the GERD Reservoir in Ethiopia**
 
 
 -   Free software: MIT license
