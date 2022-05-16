@@ -94,6 +94,8 @@ elevation_dataset = ee.ImageCollection('JAXA/ALOS/AW3D30/V3_2')\
     .clip(GERD_aoi)\
     .reproject(crs='EPSG:32636', scale=30)
 
+fabdem = ee.ImageCollection("projects/sat-io/open-datasets/FABDEM").median()
+
 
 def random_string(string_length=3):
     import random
