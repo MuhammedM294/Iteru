@@ -6,6 +6,7 @@ import ipyleaflet
 from IPython.display import display
 import datetime
 from .common import *
+from statistics import mode
 
 
 def ee_tilelayer(ee_object, vis_params=None, name=''):
@@ -432,6 +433,8 @@ def toNatural(img):
 
 def RefinedLee(img):
 
+    # ©2018 Guido Lemoine, European Commission, Joint Research Centre
+
     weights3 = ee.List.repeat(ee.List.repeat(1, 3), 3)
     kernel3 = ee.Kernel.fixed(3, 3, weights3, 1, 1, False)
 
@@ -530,6 +533,8 @@ def apply_RefinedLee(img):
 
 
 def otsu(histogram):
+
+    # ©2017, Nicholas Clinton, Developer Advocate, Google Earth Engine
 
     counts = ee.Array(ee.Dictionary(histogram).get('histogram'))
     means = ee.Array(ee.Dictionary(histogram).get('bucketMeans'))
@@ -719,3 +724,84 @@ def GERD_water_stats(aoi=GERD_aoi,
 
             except:
                 print('Error! Memory Limit Exceeded.')
+
+
+def SAR_VV_stats_single_img(system_start_time, aoi):
+
+    SAR = ee.ImageCollection('COPERNICUS/S1_GRD')\
+        .filter(ee.Filter.equals('relativeOrbitNumber_start', 50))\
+        .filter(ee.Filter.eq('instrumentMode', 'IW'))\
+        .filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'))\
+        .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))\
+        .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))\
+        .filter(ee.Filter.eq('resolution_meters', 10))\
+        .filterBounds(aoi)\
+        .filter(ee.Filter.eq('system:time_start', system_start_time))\
+        .select(['VV'])\
+        .median()
+
+    VV_smooth = ee.Image(
+        toDB(RefinedLee(toNatural(SAR.select(['VV']))))).rename('VV_Filtered')
+
+    histogram_VV = VV_smooth.select('VV_Filtered').reduceRegion(
+        reducer=ee.Reducer.histogram().combine(
+            'mean', None, True).combine('variance', None, True),
+        geometry=aoi,
+        scale=10,
+        bestEffort=True)
+
+    otsu_threshold_VV = otsu(histogram_VV.get('VV_Filtered_histogram'))
+
+    water_mask_VV = VV_smooth.select('VV_Filtered').lt(
+        otsu_threshold_VV).selfMask().rename('water_mask')
+
+    water_mask_VV = water_mask_VV.select('water_mask').clip(aoi)
+
+    feature_VV = ee.Image(1).updateMask(water_mask_VV).reduceToVectors(
+        geometry=water_mask_VV.geometry(),
+        crs='EPSG:32636',
+        scale=10,
+        geometryType='polygon',
+        eightConnected=False,
+        labelProperty='water_cover',
+        bestEffort=True
+    )
+
+    feature_VV = feature_VV.map(calc_area)
+
+    lake_feature_VV = feature_VV.sort('Area', False).first()
+
+    lake_area_VV = lake_feature_VV.geometry().area(maxError=1)
+
+    lake_dem_VV = fabdem.clip(lake_feature_VV)
+
+    elevations_VV = lake_dem_VV.reduceRegion(
+        reducer=ee.Reducer.toList(),
+        geometry=lake_dem_VV.geometry(),
+        maxPixels=1e11,
+        scale=30,
+        crs='EPSG:32636',
+        bestEffort=True
+    ).get('b1')
+
+    elevations_list_VV = ee.List(elevations_VV).getInfo()
+
+    elevations_desc_VV = sorted(elevations_list_VV, reverse=True)
+
+    water_level_VV = mode(elevations_desc_VV[:1000])
+
+    volume_VV = ((water_level_VV*len(elevations_desc_VV) -
+                 sum(elevations_desc_VV))*900)/1e9
+
+    stats = {'Otsu_threshold': otsu_threshold_VV.getInfo(),
+             'Area': lake_area_VV.getInfo()/1e6,
+             'Level': water_level_VV,
+             'Volume': volume_VV
+             }
+
+    layers = {'SAR_VV': VV_smooth,
+
+              'Waterbody': lake_feature_VV
+              }
+
+    return (stats, layers)
