@@ -285,8 +285,8 @@ def SAR_timeseries_url(col, aoi, vis_method='rgb', water_threshold=-25, frame_pe
     try:
         if vis_method == 'rgb':
 
-            vis_min = [-35, -35, 0]
-            vis_max = [0, 0, 5]
+            vis_min = [-40, -40, -3]
+            vis_max = [5, 5, 5]
             bands = ['VV', 'VH', 'VV/VH']
 
         elif vis_method == 'single_band_VV':
@@ -325,7 +325,7 @@ def SAR_timeseries_url(col, aoi, vis_method='rgb', water_threshold=-25, frame_pe
             vis_max = 255
         else:
             raise Exception('Invalid visualization method input. The visualization method should be'
-                            '"rgb","singl_band_VV","single_band_VH","water_mask" or "rgb_water_mosaic"')
+                            '"rgb","singl_band_VV","single_band_VH","single_band_VH_R","single_band_VH_R","water_mask" or "rgb_water_mosaic"')
 
     except Exception as e:
         print(e)
@@ -773,6 +773,8 @@ def SAR_VV_stats_single_img(system_start_time, aoi):
 
     lake_area_VV = lake_feature_VV.geometry().area(maxError=1)
 
+    pix_num = lake_area_VV.getInfo()/1e5
+
     lake_dem_VV = fabdem.clip(lake_feature_VV)
 
     elevations_VV = lake_dem_VV.reduceRegion(
@@ -788,7 +790,7 @@ def SAR_VV_stats_single_img(system_start_time, aoi):
 
     elevations_desc_VV = sorted(elevations_list_VV, reverse=True)
 
-    water_level_VV = mode(elevations_desc_VV[:1000])
+    water_level_VV = mode(elevations_desc_VV[100:round(0.5*pix_num)])
 
     volume_VV = ((water_level_VV*len(elevations_desc_VV) -
                  sum(elevations_desc_VV))*900)/1e9
