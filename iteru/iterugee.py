@@ -150,9 +150,9 @@ def water_classify_threshold(col, threshold):
 def rgb_water_mosaic(img):
 
     img_rgb = img.visualize(
-        **{'min': [-35, -35, 0], 'max': [0, 0, 5], 'bands': ['VV', 'VH', 'VV/VH']})
+        **{'min': [-40, -40, -3], 'max': [5, 5, 5], 'bands': ['VV', 'VH', 'VV/VH']})
 
-    water_vis = img.select('Water_mask').visualize(
+    water_vis = img.select('water_mask').visualize(
         **{'min': 0.5, 'max': 1, 'palette': ['00FFFF', '0000FF']})
 
     mosaic = ee.ImageCollection([img_rgb, water_vis]).mosaic()
@@ -298,7 +298,6 @@ def SAR_timeseries_url(col, aoi, vis_method='rgb', water_threshold=-25, frame_pe
             palette = ['#FFFFFF', '#000000']
 
         elif vis_method == 'single_band_VH':
-
             bands = ['VH']
             palette = ['#000000', '#FFFFFF']
 
