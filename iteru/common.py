@@ -372,11 +372,13 @@ def get_gif(url):
 
 
 def add_text_to_gif(out_gif, dates_list,
-                    dates_font_size=25,
+                    dates_font_size=22,
                     copywrite_font_size=15,
-                    dates_font_color='red',
+                    dates_font_color='black',
                     copywrite_font_color='black',
-                    framesPerSecond=4):
+                    framesPerSecond=3,
+                    zoom_level='Zoom Level: 14',
+                    zoom_level_font_size=15):
 
     from PIL import Image, ImageDraw, ImageFont, ImageSequence
     import io
@@ -390,14 +392,15 @@ def add_text_to_gif(out_gif, dates_list,
     count = gif.n_frames
 
     width, height = gif.size
-    dates_text_xy = (int(0.001 * width), int(0.001 * height))
-    copywrite_xy = (int(0.001 * width), int(0.98 * height))
+    dates_text_xy = (int(0.01 * width), int(0.003 * height))
+    copywrite_xy = (int(0.01 * width), int(0.97 * height))
+    zoom_level_xy = (int(0.02 * width), int(0.94 * height))
 
     dates_text = dates_list
-    copywrite = '©Iteru, 2022'
+    copywrite = '©2022, IteruApp'
     dates_text_font = ImageFont.truetype(default_font, dates_font_size)
     copywrite_font = ImageFont.truetype(default_font, copywrite_font_size)
-
+    zoom_level_font = ImageFont.truetype(default_font, zoom_level_font_size)
     frames = []
 
     for index, frame in enumerate(ImageSequence.Iterator(gif)):
@@ -407,6 +410,9 @@ def add_text_to_gif(out_gif, dates_list,
                   fill=dates_font_color, font=dates_text_font)
         draw.text(copywrite_xy, copywrite,
                   fill=copywrite_font_color, font=copywrite_font)
+        draw.text(zoom_level_xy, zoom_level,
+                  fill=copywrite_font_color, font=zoom_level_font)
+
         b = io.BytesIO()
         frame.save(b, format="GIF")
         frame = Image.open(b)

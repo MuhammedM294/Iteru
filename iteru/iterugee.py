@@ -598,6 +598,8 @@ def GERD_SAR_timelaspe(aoi=GERD_aoi,
                        dates_font_color='red',
                        copywrite_font_color='black',
                        framesPerSecond=2,
+                       zoom_level='Zoom Level: 14',
+                       zoom_level_font_size=20
                        ):
     try:
         SAR_col = S1_SAR_col(aoi, startYear, startMonth,
@@ -630,7 +632,9 @@ def GERD_SAR_timelaspe(aoi=GERD_aoi,
                                               copywrite_font_size,
                                               dates_font_color,
                                               copywrite_font_color,
-                                              framesPerSecond)
+                                              framesPerSecond,
+                                              zoom_level,
+                                              zoom_level_font_size)
 
                     return out_gif
 
