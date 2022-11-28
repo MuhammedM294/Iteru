@@ -54,6 +54,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/MuhammedM294/iteru',
-    version='0.0.29',
+    version='0.0.30',
     zip_safe=False,
 )
