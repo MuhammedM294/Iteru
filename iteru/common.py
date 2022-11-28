@@ -10,7 +10,7 @@ import requests
 import shutil
 
 def ee_initialize(
-    token_name="EARTHENGINE_TOKEN",  service_account=False
+    token_name="EARTHENGINE_TOKEN", auth_mode="appdefault", service_account=False
 ):
     """Authenticates Earth Engine and initialize an Earth Engine session
     Args:
@@ -74,7 +74,7 @@ def ee_initialize(
                     if credentials_in_drive() and (not credentials_in_colab()):
                         copy_credentials_to_colab()
                     elif not credentials_in_colab:
-                        ee.Authenticate()
+                        ee.Authenticate(auth_mode="appdefault")
                         if is_drive_mounted() and (not credentials_in_drive()):
                             copy_credentials_to_drive()
                     else:
@@ -83,7 +83,7 @@ def ee_initialize(
 
                 ee.Initialize(http_transport=httplib2.Http())
             except Exception:
-                ee.Authenticate()
+                ee.Authenticate(auth_mode="appdefault")
                 ee.Initialize(http_transport=httplib2.Http())
 
 
