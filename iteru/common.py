@@ -27,7 +27,7 @@ def ee_initialize(token_name="EARTHENGINE_TOKEN"):
             ee.Initialize()
 
 
-#ee_initialize(token_name="EARTHENGINE_TOKEN")
+ee_initialize(token_name="EARTHENGINE_TOKEN")
 
 GERD_aoi = ee.Geometry.Polygon([
     [
