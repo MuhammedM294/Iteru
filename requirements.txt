@@ -1,4 +1,4 @@
-earthengine-api=0.1.320
+earthengine-api==0.1.320
 ipyleaflet 
 ipywidgets
 geemap 
