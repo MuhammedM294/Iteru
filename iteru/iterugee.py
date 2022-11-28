@@ -31,7 +31,7 @@ def get_vis_params(collection):
         collection ([ImageCollection]): [GEE ImageColelction]
 
     Returns:
-        [dict]: [Visualization paramters ]
+        [dict]: [Visualization paramters]
     """
     min = float(collection.getInfo()['properties']['visualization_0_min'])
     max = float(collection.getInfo()['properties']['visualization_0_max'])
