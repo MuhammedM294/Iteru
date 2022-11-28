@@ -10,7 +10,7 @@ import requests
 import shutil
 
 def ee_initialize(
-    token_name="EARTHENGINE_TOKEN", auth_mode="notebook", service_account=False
+    token_name="EARTHENGINE_TOKEN", auth_mode="paste", service_account=False
 ):
     """Authenticates Earth Engine and initialize an Earth Engine session
     Args:
