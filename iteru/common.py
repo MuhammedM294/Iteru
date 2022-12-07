@@ -7,7 +7,7 @@ from ipywidgets import *
 from IPython.display import display
 import geemap
 
-geemap.ee_initialize()
+geemap.ee_initialize(auth_mode='gcloud')
 
 GERD_aoi = ee.Geometry.Polygon([[
         [
