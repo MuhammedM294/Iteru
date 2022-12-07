@@ -2,7 +2,7 @@
 
 __author__ = """Muhammed Abdelaal"""
 __email__ = 'muhammedaabdelaal@gmail.com'
-__version__ = '0.0.43'
+__version__ = '0.0.44'
 
 
 from .map import *
