@@ -8,7 +8,7 @@ from IPython.display import display
 from ipyleaflet import WidgetControl
 from .iterugee import *
 from .common import *
-import geemap.foliumap as geemap
+import geemap
 
 
 class Map(geemap.Map):
@@ -30,14 +30,14 @@ class Map(geemap.Map):
             kwargs['scroll_wheel_zoom'] = True
 
         if 'height' not in kwargs:
-            #self.layout.height = '500px'
-            pass
+            self.layout.height = '500px'
+            
         else:
-            #self.layout.height = kwargs['height']
-            pass
+            self.layout.height = kwargs['height']
+            
 
         super().__init__(**kwargs)
-        """
+        
         self.clear_controls()
         self.add_control(ipyleaflet.SearchControl(
 
@@ -99,7 +99,7 @@ class Map(geemap.Map):
         self.draw_control = draw_control
         self.last_draw = draw_control.last_draw
         self.last_action = draw_control.last_action
-        """
+        
         def handle_draw(target, action, geo_json):
             self.last_draw = geo_json
             self.last_action = action
@@ -113,7 +113,7 @@ class Map(geemap.Map):
                 self.aoi = ee.Geometry.LineString(
                     self.last_draw['geometry']['coordinates'])
 
-        #self.draw_control.on_draw(handle_draw)
+        self.draw_control.on_draw(handle_draw)
 
         measure = ipyleaflet.MeasureControl(
             position='topright',
@@ -125,9 +125,9 @@ class Map(geemap.Map):
 
         measure.add_area_unit('Sq Kilometers', 1e-6, 4)
         measure.primary_area_unit = ('Sq Kilometers')
-        #self.add_control(measure)
+        self.add_control(measure)
 
-        #self.add_control(TOC_widget)
+        self.add_control(TOC_widget)
 
         def add_to_map(change):
             if change.new:
@@ -170,10 +170,10 @@ class Map(geemap.Map):
                                     <b>Elevation</b>:{point_elevation['DSM']}
                                     """
 
-        #self.on_interaction(handle_interaction)
+        self.on_interaction(handle_interaction)
         coordinates_widget = WidgetControl(
             widget=coordinates, position='bottomleft')
-        #self.add_control(coordinates_widget)
+        self.add_control(coordinates_widget)
 
     def add_layer_widgets(self, object, vis_params=None, name=None):
 
