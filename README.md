@@ -37,4 +37,4 @@ Contributions to this project are welcome! If you encounter any issues or have s
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+This project is licensed under the [MIT](https://choosealicense.com/licenses/mit/) License.
