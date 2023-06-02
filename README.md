@@ -1,10 +1,11 @@
-# Iteru
+# Iteru: Continuous Monitoring of GERD Reservoir using Google Earth Engine API and Sentinel-1 SAR Imagery
 
 
 [![image](https://img.shields.io/pypi/v/iteru.svg)](https://pypi.python.org/pypi/iteru)
 
+**This GitHub project serves as a Python package developed for my M.Sc. thesis in Geoinformatics and Remote Sensing. The primary objective of this project is to provide a robust solution for continuously monitoring the Grand Ethiopian Renaissance Dam [(GERD)](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) reservoir in Ethiopia. By leveraging the Google Earth Engine API and Sentinel-1 Synthetic Aperture Radar (SAR) imagery, this package offers valuable insights into the reservoir's water storage dynamics and changes over time.**
 
-**This project is a part of my final work for my M.Sc. thesis in Geoinformatic and Remote Sensing. The work is a Python Package for Continuously Monitoring the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) Reservoir in Ethiopia using Google Earth Engine API Using Sentinal-1 SAR Imagery**
+
 
 
 ## Installation
@@ -17,20 +18,22 @@ To install iteru, run this command in your terminal:
   pip install iteru
 ```
    
+## Key Features
 
-## Features
-
-
--   Display Earth Engine data layers for interactive mapping.
--   Create Sentinel-1 timelaspe animations of the GERD reservoir waterbody.
--   Map the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) reservoir surface water extent.
--   Calculate the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) reservoir surface water level. 
--   Compute the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) reservoir waterbody volume.
+    - Access and retrieve Sentinel-1 SAR imagery using the Google Earth Engine API.
+    - Preprocess SAR imagery by applying calibration and speckle filtering techniques.
+    - Extract relevant information and parameters related to the GERD reservoir.
+    - Analyze and visualize the reservoir's variations and water storage dynamics.
+    - Implement continuous monitoring mechanisms for timely updates.
+    - Integrate scheduled tasks or event-based triggers for data retrieval and processing.
 
 ## Credits
 
 This package was created with [Cookiecutter](https://github.com/cookiecutter/cookiecutter) and the [giswqs/pypackage](https://github.com/giswqs/pypackage) project template.
 
+## Contributing
+
+Contributions to this project are welcome! If you encounter any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request.
 
 ## License
 
