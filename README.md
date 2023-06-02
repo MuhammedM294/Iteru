@@ -20,12 +20,12 @@ To install iteru, run this command in your terminal:
    
 ## Key Features
 
-    - Access and retrieve Sentinel-1 SAR imagery using the Google Earth Engine API.
-    - Preprocess SAR imagery by applying calibration and speckle filtering techniques.
-    - Extract relevant information and parameters related to the GERD reservoir.
-    - Analyze and visualize the reservoir's variations and water storage dynamics.
-    - Implement continuous monitoring mechanisms for timely updates.
-    - Integrate scheduled tasks or event-based triggers for data retrieval and processing.
+- Access and retrieve Sentinel-1 SAR imagery using the Google Earth Engine API.
+- Preprocess SAR imagery by applying calibration and speckle filtering techniques.
+- Extract relevant information and parameters related to the GERD reservoir.
+- Analyze and visualize the reservoir's variations and water storage dynamics.
+- Implement continuous monitoring mechanisms for timely updates.
+- Integrate scheduled tasks or event-based triggers for data retrieval and processing.
 
 ## Credits
 
