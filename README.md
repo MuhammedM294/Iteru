@@ -4,7 +4,7 @@
 [![image](https://img.shields.io/pypi/v/iteru.svg)](https://pypi.python.org/pypi/iteru)
 
 
-**A Python Package for Continuously Monitoring the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) Reservoir in Ethiopia using Google Earth Engine API Using Sentinal-1 SAR Imagery**
+**This project is a part of my final work for my M.Sc. thesis in Geoinformatic and Remote Sensing. The work is a Python Package for Continuously Monitoring the [GERD](https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam) Reservoir in Ethiopia using Google Earth Engine API Using Sentinal-1 SAR Imagery**
 
 
 ## Installation
