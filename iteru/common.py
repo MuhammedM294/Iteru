@@ -376,7 +376,7 @@ def add_text_to_gif(out_gif, dates_list,
     zoom_level_xy = (int(0.02 * width), int(0.94 * height))
 
     dates_text = dates_list
-    copywrite = '©2022, IteruApp'
+    copywrite = '©2023, IteruApp'
     dates_text_font = ImageFont.truetype(default_font, dates_font_size)
     copywrite_font = ImageFont.truetype(default_font, copywrite_font_size)
     zoom_level_font = ImageFont.truetype(default_font, zoom_level_font_size)
