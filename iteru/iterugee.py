@@ -763,7 +763,7 @@ def SAR_VV_stats_single_img(system_start_time, aoi):
     feature_VV = ee.Image(1).updateMask(water_mask_VV).reduceToVectors(
         geometry=water_mask_VV.geometry(),
         crs='EPSG:32636',
-        scale=10,
+        scale=30,
         geometryType='polygon',
         eightConnected=False,
         labelProperty='water_cover',
